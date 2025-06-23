@@ -8,4 +8,6 @@ use Illuminate\Database\zEloquent\Model;
 class NhanVien extends Model
 {
     use HasFactory;
+    protected $fillable = ['chucvu', 'luong'];
+
 }

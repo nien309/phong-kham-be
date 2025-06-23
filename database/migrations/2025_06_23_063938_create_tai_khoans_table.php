@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+class CreateTaiKhoansTable extends Migration
 {
     public $withinTransaction = false;
     /**
@@ -22,7 +22,7 @@ class CreateUsersTable extends Migration
         $table->date('ngaysinh');
         $table->string('diachi');
         $table->string('sdt');
-        $table->string('email');
+        $table->string('email')->unique();
         $table->enum('trangthai', ['active', 'inactive', 'suspended'])->default('active');
         
         $table->enum('loai_taikhoan', ['khachhang', 'nhanvien', 'admin']); // Phân loại
