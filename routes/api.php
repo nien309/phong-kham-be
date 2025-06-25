@@ -6,6 +6,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AdminTaiKhoanController;
 
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return response()->json($request->user());
+});
+
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);

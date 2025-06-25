@@ -16,7 +16,7 @@ class TaiKhoan extends Authenticatable
 
     protected $fillable = [
     'hoten', 'matkhau', 'sdt', 'email', 'diachi',
-    'gioitinh', 'ngaysinh', 'trangthai', 'loai_taikhoan', 'id_nguoidung'
+    'gioitinh', 'ngaysinh', 'trangthai', 'loai_taikhoan', 'phan_quyen', 'id_nguoidung'
 ];
 
     protected $hidden = ['matkhau'];
