@@ -9,32 +9,36 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-
+use App\Mail\ForgotPasswordMail;
 class PasswordResetController extends Controller
 {
     public function sendResetLink(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email|exists:taikhoan,email',
-        ]);
+{
+    $request->validate([
+        'email' => 'required|email|exists:taikhoan,email',
+    ]);
 
-        $token = Str::random(60);
+    $token = Str::random(60);
 
-        DB::table('password_resets')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'email' => $request->email,
-                'token' => $token,
-                'created_at' => now()
-            ]
-        );
+    DB::table('password_resets')->updateOrInsert(
+        ['email' => $request->email],
+        [
+            'email' => $request->email,
+            'token' => $token,
+            'created_at' => now()
+        ]
+    );
 
-        // Tùy chỉnh gửi email (tạm in ra token thay vì gửi mail)
-        return response()->json([
-            'message' => 'Token gửi thành công',
-            'token' => $token
-        ]);
-    }
+    $user = TaiKhoan::where('email', $request->email)->first();
+
+   $resetUrl = env('CLIENT_BASE_URL') . "/reset-password?token=$token&email=" . urlencode($request->email);
+
+    Mail::to($request->email)->send(new ForgotPasswordMail($user, $resetUrl));
+
+    return response()->json([
+        'message' => 'Email đặt lại mật khẩu đã được gửi.',
+    ]);
+}
 
     public function resetPassword(Request $request)
     {

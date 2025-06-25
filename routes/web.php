@@ -1,7 +1,8 @@
 <?php
+use App\Mail\HelloMail;
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Mail;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,15 +16,18 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
 
-Route::get('/test-db', function () {
-    try {
-        DB::connection()->getPdo();
-        return "✅ Laravel đã kết nối được với Neon PostgreSQL!";
-    } catch (\Exception $e) {
-        return "❌ Lỗi kết nối: " . $e->getMessage();
-    }
-});
+// Route::get('/test-db', function () {
+//     try {
+//         DB::connection()->getPdo();
+//         return "✅ Laravel đã kết nối được với Neon PostgreSQL!";
+//     } catch (\Exception $e) {
+//         return "❌ Lỗi kết nối: " . $e->getMessage();
+//     }
+// });
 
 Route::get('/', function () {
+    // Mail::to('thuoanhnh@gmail.com')
     return view('welcome');
+    // ->send(new ForgotPasswordMail());
+   // ->send(new HelloMail());
 });
