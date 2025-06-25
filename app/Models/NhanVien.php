@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\zEloquent\Model;
+use Illuminate\Database\Eloquent\Model;
 
 class NhanVien extends Model
 {
-    use HasFactory;
-    protected $fillable = ['chucvu', 'luong'];
+    protected $table = 'nhan_viens'; // tên bảng nếu không giống tên model
+    protected $primaryKey = 'id_nhanvien'; // Sửa lỗi thiếu cột id
+    public $timestamps = true; // hoặc false nếu không có timestamps
 
+    protected $fillable = ['chucvu', 'luong']; // thêm nếu cần fillable
 }

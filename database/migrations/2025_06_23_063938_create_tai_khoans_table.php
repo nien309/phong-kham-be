@@ -24,11 +24,14 @@ class CreateTaiKhoansTable extends Migration
         $table->string('sdt');
         $table->string('email')->unique();
         $table->enum('trangthai', ['active', 'inactive', 'suspended'])->default('active');
-        
+        $table->enum('phan_quyen', ['admin_hethong', 'admin_nhansu', 'khachhang', 'nhanvien'])->default('khachhang');
+
         $table->enum('loai_taikhoan', ['khachhang', 'nhanvien', 'admin']); // Phân loại
         $table->unsignedBigInteger('id_nguoidung')->nullable();   // Khóa ngoại mềm (chứa id_khachhang hoặc id_nhanvien)
         
         $table->timestamps();
+        $table->softDeletes(); // thêm dòng này để hỗ trợ xóa mềm
+
 });
 
     }
@@ -40,6 +43,6 @@ class CreateTaiKhoansTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('taikhoan');
     }
 }

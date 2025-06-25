@@ -11,34 +11,26 @@ class AuthController extends Controller
 {
     public function register(Request $request)
 {
-      if (\App\Models\TaiKhoan::where('email', $request->email)->exists()) {
-        return response()->json(['message' => 'Email đã tồn tại'], 409); // 409 Conflict
+    if (\App\Models\TaiKhoan::where('email', $request->email)->exists()) {
+        return response()->json(['message' => 'Email đã tồn tại'], 409);
     }
 
     if (\App\Models\TaiKhoan::where('sdt', $request->sdt)->exists()) {
         return response()->json(['message' => 'Số điện thoại đã tồn tại'], 409);
     }
+
     $validated = $request->validate([
         'hoten' => 'required|string',
         'matkhau' => 'required|string|min:6|confirmed',
-        'sdt' => 'required|unique:taikhoan,sdt',
-        'email' => 'required|email|unique:taikhoan,email',
-        'loai_taikhoan' => 'required|in:khachhang,nhanvien',
+        'sdt' => 'required',
+        'email' => 'required|email',
     ]);
 
-    // Tạo bản ghi người dùng tương ứng
-    if ($validated['loai_taikhoan'] === 'khachhang') {
-        $nguoidung = \App\Models\KhachHang::create([
-            'nghenghiep' => $request->nghenghiep ?? '',
-        ]);
-    } else {
-        $nguoidung = \App\Models\NhanVien::create([
-            'chucvu' => $request->chucvu ?? 'letan',
-            'luong' => $request->luong ?? 0,
-        ]);
-    }
+    // Mặc định là khách hàng
+    $nguoidung = \App\Models\KhachHang::create([
+        'nghenghiep' => $request->nghenghiep ?? '',
+    ]);
 
-    // Tạo tài khoản chung
     $taikhoan = \App\Models\TaiKhoan::create([
         'hoten' => $validated['hoten'],
         'matkhau' => bcrypt($validated['matkhau']),
@@ -47,7 +39,7 @@ class AuthController extends Controller
         'gioitinh' => $request->gioitinh ?? 'khac',
         'ngaysinh' => $request->ngaysinh ?? now(),
         'diachi' => $request->diachi ?? '',
-        'loai_taikhoan' => $validated['loai_taikhoan'],
+        'loai_taikhoan' => 'khachhang', // không để user chọn
         'id_nguoidung' => $nguoidung->getKey(),
     ]);
 
@@ -56,6 +48,7 @@ class AuthController extends Controller
         'taikhoan' => $taikhoan
     ]);
 }
+
 public function login(Request $request)
 {
     $request->validate([

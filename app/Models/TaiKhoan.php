@@ -5,11 +5,12 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TaiKhoan extends Authenticatable
 {
     use HasApiTokens;
-
+     use SoftDeletes;
     protected $table = 'taikhoan';
     protected $primaryKey = 'id_taikhoan';
 
