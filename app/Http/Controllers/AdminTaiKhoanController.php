@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Services\LogService;
 
 use Illuminate\Http\Request;
 
@@ -43,7 +44,7 @@ class AdminTaiKhoanController extends Controller
         'phan_quyen' => $validated['phan_quyen'],
         'id_nguoidung' => $nguoidung->getKey(),
     ]);
-
+      LogService::log('Tạo tài khoản mới: ' . $taikhoan->hoten, 'taikhoan');
     return response()->json([
         'message' => 'Tạo tài khoản thành công',
         'taikhoan' => $taikhoan,
