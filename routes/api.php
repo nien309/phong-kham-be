@@ -24,12 +24,16 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    Route::prefix('admin')->group(function () {
-        Route::get('/taikhoan', [AdminTaiKhoanController::class, 'index']);
+    Route::middleware(['auth:sanctum', 'check.admin'])->prefix('admin')->group(function () {
+    Route::get('/taikhoan', [AdminTaiKhoanController::class, 'index']);
+    Route::get('/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
+    Route::post('/taikhoan', [AdminTaiKhoanController::class, 'createFromAdmin']);
+    Route::put('/taikhoan/{id}', [AdminTaiKhoanController::class, 'update']);
+    Route::delete('/taikhoan/{id}', [AdminTaiKhoanController::class, 'destroy']);
+});
+    Route::middleware(['auth:sanctum', 'check.user'])->prefix('admin')->group(function () {
         Route::get('/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
-        Route::post('/taikhoan', [AdminTaiKhoanController::class, 'createFromAdmin']);
-        Route::put('/taikhoan/{id}', [AdminTaiKhoanController::class, 'update']);
-        Route::delete('/taikhoan/{id}', [AdminTaiKhoanController::class, 'destroy']);
+
     });
 });
 
