@@ -11,4 +11,9 @@ class NhanVien extends Model
     public $timestamps = true; // hoặc false nếu không có timestamps
 
     protected $fillable = ['chucvu', 'luong']; // thêm nếu cần fillable
+    public function khoa()
+{
+    return $this->belongsTo(Khoa::class, 'id_khoa', 'id_khoa');
+}
+
 }

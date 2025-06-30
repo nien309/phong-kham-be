@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AdminTaiKhoanController;
+use App\Http\Controllers\KhoaController;
+use App\Http\Controllers\DichVuController;
+
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return response()->json($request->user());
@@ -24,16 +28,23 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
+    Route::get('/admin/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
     Route::middleware(['auth:sanctum', 'check.admin'])->prefix('admin')->group(function () {
     Route::get('/taikhoan', [AdminTaiKhoanController::class, 'index']);
-    Route::get('/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
     Route::post('/taikhoan', [AdminTaiKhoanController::class, 'createFromAdmin']);
     Route::put('/taikhoan/{id}', [AdminTaiKhoanController::class, 'update']);
     Route::delete('/taikhoan/{id}', [AdminTaiKhoanController::class, 'destroy']);
 });
     Route::middleware(['auth:sanctum', 'check.user'])->prefix('admin')->group(function () {
-        Route::get('/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
+        // Route::get('/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
 
     });
+    Route::get('/khoas', [KhoaController::class, 'index']);
+    Route::get('/khoas/{id}', [KhoaController::class, 'show']);
+    Route::middleware(['auth:sanctum', 'check.admin'])->prefix('admin')->group(function () {
+    Route::apiResource('khoas', \App\Http\Controllers\Admin\KhoaController::class);
+    Route::apiResource('dichvus', \App\Http\Controllers\Admin\DichVuController::class);
+});
+
 });
 
