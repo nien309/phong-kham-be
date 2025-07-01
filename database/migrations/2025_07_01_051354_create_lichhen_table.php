@@ -37,6 +37,7 @@ class CreateLichhenTable extends Migration
             $table->foreign('id_khachhang')->references('id_khachhang')->on('khach_hangs')->onDelete('cascade');
             $table->foreign('id_nhanvien')->references('id_nhanvien')->on('nhan_viens')->onDelete('cascade');
             $table->foreign('id_cakham')->references('id_cakham')->on('cakham')->onDelete('cascade');
+             $table->softDeletes();
         });
     }
 

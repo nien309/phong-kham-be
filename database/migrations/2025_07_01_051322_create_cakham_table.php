@@ -15,6 +15,7 @@ class CreateCakhamTable extends Migration
             $table->enum('khunggio', ['sáng', 'chiều']);
             $table->enum('trangthai', ['đang hoạt động', 'đã tắt'])->default('đang hoạt động');
             $table->timestamps();
+             $table->softDeletes();
         });
     }
 

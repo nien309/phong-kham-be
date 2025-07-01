@@ -19,7 +19,7 @@ class KhoaController extends Controller
             'trangthai' => 'required|in:hoatdong,tamngung',
         ]);
 
-        LogService::log('Tạo khoa mới: ' . $khoa->tenkhoa, 'khoas');
+        LogService::log('Tạo khoa mới: ' . $request->tenkhoa, 'khoas');
         return Khoa::create($validated);
     }
 
