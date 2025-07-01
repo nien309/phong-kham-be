@@ -87,16 +87,16 @@ class AdminTaiKhoanController extends Controller
         ]));
 
         // Cập nhật bảng phụ
-        if ($taikhoan->loai_taikhoan === 'khachhang') {
-            \App\Models\KhachHang::where('id_khachhang', $taikhoan->id_nguoidung)->update([
-                'nghenghiep' => $request->nghenghiep,
-            ]);
-        } elseif ($taikhoan->loai_taikhoan === 'nhanvien') {
-            \App\Models\NhanVien::where('id_nhanvien', $taikhoan->id_nguoidung)->update([
-                'chucvu' => $request->chucvu,
-                'luong' => $request->luong,
-            ]);
-        }
+        // if ($taikhoan->loai_taikhoan === 'khachhang') {
+        //     \App\Models\KhachHang::where('id_khachhang', $taikhoan->id_nguoidung)->update([
+        //         'nghenghiep' => $request->nghenghiep,
+        //     ]);
+        // } elseif ($taikhoan->loai_taikhoan === 'nhanvien') {
+        //     \App\Models\NhanVien::where('id_nhanvien', $taikhoan->id_nguoidung)->update([
+        //         'chucvu' => $request->chucvu,
+        //         'luong' => $request->luong,
+        //     ]);
+        // }
 
         return response()->json(['message' => 'Cập nhật thành công']);
     }
