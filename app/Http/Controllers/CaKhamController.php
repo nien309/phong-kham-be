@@ -7,58 +7,26 @@ use Illuminate\Http\Request;
 
 class CaKhamController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'khunggio' => 'required|in:sáng,chiều',
+            'trangthai' => 'required|in:đang hoạt động,đã tắt',
+        ]);
+
+        return CaKham::create($validated);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\CaKham  $caKham
-     * @return \Illuminate\Http\Response
-     */
-    public function show(CaKham $caKham)
+    public function update(Request $request, $id)
     {
-        //
-    }
+        $cakham = CaKham::findOrFail($id);
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\CaKham  $caKham
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, CaKham $caKham)
-    {
-        //
-    }
+        $validated = $request->validate([
+            'khunggio' => 'in:sáng,chiều',
+            'trangthai' => 'in:đang hoạt động,đã tắt',
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\CaKham  $caKham
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(CaKham $caKham)
-    {
-        //
+        $cakham->update($validated);
+        return $cakham;
     }
 }

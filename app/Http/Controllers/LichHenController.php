@@ -7,58 +7,20 @@ use Illuminate\Http\Request;
 
 class LichHenController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    
+    public function datLich(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'id_khachhang' => 'required|exists:khach_hangs,id_khachhang',
+            'id_nhanvien' => 'required|exists:nhanviens,id_nhanvien',
+            'id_cakham' => 'required|exists:cakham,id_cakham',
+            'ngayhen' => 'required|date',
+            'ghichu' => 'nullable|string',
+        ]);
+
+        $validated['trangthai'] = 'chờ xác nhận';
+
+        return LichHen::create($validated);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\LichHen  $lichHen
-     * @return \Illuminate\Http\Response
-     */
-    public function show(LichHen $lichHen)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\LichHen  $lichHen
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, LichHen $lichHen)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\LichHen  $lichHen
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(LichHen $lichHen)
-    {
-        //
-    }
 }
