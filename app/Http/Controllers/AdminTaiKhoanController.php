@@ -52,7 +52,7 @@ class AdminTaiKhoanController extends Controller
 }
     public function index()
     {
-        $taikhoans = \App\Models\TaiKhoan::all();
+        $taikhoans = \App\Models\TaiKhoan::all()->sortBy('id_taikhoan')->values();
 
         $taikhoans = $taikhoans->map(function ($tk) {
             $tk->nguoidung = $tk->nguoidung(); // Gọi thủ công
