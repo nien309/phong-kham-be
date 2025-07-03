@@ -98,10 +98,15 @@ class NhanVienController extends Controller
     public function destroy($id)
     {
         $nhanvien = NhanVien::findOrFail($id);
+
+        // Xoá mềm tài khoản liên kết nếu có
+        if ($nhanvien->taikhoan) {
+            $nhanvien->taikhoan->delete();
+        }
+
         $nhanvien->delete();
 
-        LogService::log('Xoá nhân viên ID: ' . $id, 'nhanviens');
-
-        return response()->json(['message' => 'Đã xoá nhân viên']);
+        return response()->json(['message' => 'Đã xoá nhân viên và tài khoản liên quan']);
     }
+
 }

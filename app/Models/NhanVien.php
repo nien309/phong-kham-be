@@ -28,11 +28,12 @@ class NhanVien extends Model
     }
 
     // Quan hệ với bảng Tài Khoản (nếu có)
-   public function taikhoan()
-{
-    return $this->hasOne(TaiKhoan::class, 'id_nguoidung')
-                ->where('loai_taikhoan', 'nhanvien');
-}
+    public function taikhoan()
+    {
+        return $this->hasOne(TaiKhoan::class, 'id_nguoidung', 'id_nhanvien')
+                    ->where('loai_taikhoan', 'nhanvien');
+    }
+
     // Quan hệ với các lịch hẹn (nếu có)
     public function lichHen()
     {

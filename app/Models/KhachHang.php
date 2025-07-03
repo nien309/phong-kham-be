@@ -13,9 +13,10 @@ class KhachHang extends Model
     protected $fillable = ['nghenghiep'];
     public $timestamps = true; // nếu có created_at, updated_at
     public function taikhoan()
-{
-    return $this->hasOne(TaiKhoan::class, 'id_nguoidung')
-                ->where('loai_taikhoan', 'khachhang');
-}
+    {
+        return $this->hasOne(TaiKhoan::class, 'id_nguoidung', 'id_khachhang')
+                    ->where('loai_taikhoan', 'khachhang');
+    }
+
 
 }

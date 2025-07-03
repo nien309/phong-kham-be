@@ -16,54 +16,59 @@ class KhachHangController extends Controller
     }
 
     public function store(Request $request)
-    {
-        // Gán mặc định nếu không có
-        $request->merge([
-            'loai_taikhoan' => $request->input('loai_taikhoan', 'khachhang'),
-            'phan_quyen' => $request->input('phan_quyen', 'khachhang'),
-        ]);
+{
+    $taikhoanData = $request->input('taikhoan');
 
-        // Validate toàn bộ dữ liệu
-        $validated = $request->validate([
-            'hoten' => 'required|string',
-            'matkhau' => 'required|string|min:6|confirmed',
-            'sdt' => 'required|unique:taikhoan,sdt',
-            'email' => 'required|email|unique:taikhoan,email',
-            'gioitinh' => 'nullable|string',
-            'ngaysinh' => 'nullable|date',
-            'diachi' => 'nullable|string',
-            'loai_taikhoan' => 'required|in:khachhang,nhanvien,admin',
-            'phan_quyen' => 'required|in:admin_hethong,admin_nhansu,khachhang,nhanvien',
-            'nghenghiep' => 'nullable|string'
-        ]);
+    // Gán mặc định nếu thiếu
+    $taikhoanData['loai_taikhoan'] = $taikhoanData['loai_taikhoan'] ?? 'khachhang';
+    $taikhoanData['phan_quyen'] = $taikhoanData['phan_quyen'] ?? 'khachhang';
 
-        // Tạo khách hàng trước
-        $khachhang = KhachHang::create([
-            'nghenghiep' => $validated['nghenghiep'] ?? '',
-        ]);
+    // ✅ Validate thông tin khách hàng
+    $validatedKhachHang = $request->validate([
+        'nghenghiep' => 'nullable|string',
+    ]);
 
-        // Tạo tài khoản gắn với khách hàng
-        $taikhoan = TaiKhoan::create([
-            'hoten' => $validated['hoten'],
-            'matkhau' => bcrypt($validated['matkhau']),
-            'sdt' => $validated['sdt'],
-            'email' => $validated['email'],
-            'gioitinh' => $request->gioitinh ?? 'khac',
-            'ngaysinh' => $request->ngaysinh ?? now(),
-            'diachi' => $request->diachi ?? '',
-            'loai_taikhoan' => $validated['loai_taikhoan'],
-            'phan_quyen' => $validated['phan_quyen'],
-            'id_nguoidung' => $khachhang->id_khachhang, // Khóa ngoại
-        ]);
+    // ✅ Validate thông tin tài khoản
+    $validatedTaiKhoan = validator($taikhoanData, [
+        'hoten' => 'required|string',
+        'matkhau' => 'required|string|min:6|confirmed',
+        'sdt' => 'required|unique:taikhoan,sdt',
+        'email' => 'required|email|unique:taikhoan,email',
+        'gioitinh' => 'nullable|string',
+        'ngaysinh' => 'nullable|date',
+        'diachi' => 'nullable|string',
+        'loai_taikhoan' => 'required|in:khachhang,nhanvien,admin',
+        'phan_quyen' => 'required|in:admin_hethong,admin_nhansu,khachhang,nhanvien',
+    ])->validate();
 
-        LogService::log('Tạo khách hàng ID tài khoản: ' . $taikhoan->id_taikhoan, 'khachhangs');
+    // ✅ Tạo khách hàng trước
+    $khachhang = KhachHang::create([
+        'nghenghiep' => $validatedKhachHang['nghenghiep'] ?? '',
+    ]);
 
-        return response()->json([
-            'message' => 'Tạo khách hàng thành công',
-            'taikhoan' => $taikhoan,
-            'khachhang' => $khachhang
-        ], 201);
-    }
+    // ✅ Tạo tài khoản liên kết với khách hàng
+    $taikhoan = TaiKhoan::create([
+        'hoten' => $validatedTaiKhoan['hoten'],
+        'matkhau' => bcrypt($validatedTaiKhoan['matkhau']),
+        'sdt' => $validatedTaiKhoan['sdt'],
+        'email' => $validatedTaiKhoan['email'],
+        'gioitinh' => $taikhoanData['gioitinh'] ?? 'khac',
+        'ngaysinh' => $taikhoanData['ngaysinh'] ?? now(),
+        'diachi' => $taikhoanData['diachi'] ?? '',
+        'loai_taikhoan' => $validatedTaiKhoan['loai_taikhoan'],
+        'phan_quyen' => $validatedTaiKhoan['phan_quyen'],
+        'id_nguoidung' => $khachhang->id_khachhang, // liên kết
+    ]);
+
+    LogService::log('Tạo khách hàng ID tài khoản: ' . $taikhoan->id_taikhoan, 'khachhangs');
+
+    return response()->json([
+        'message' => 'Tạo khách hàng thành công',
+        'taikhoan' => $taikhoan,
+        'khachhang' => $khachhang
+    ], 201);
+}
+
 
     public function show($id)
     {
@@ -120,11 +125,17 @@ class KhachHangController extends Controller
 
     public function destroy($id)
     {
-        $khachhang = KhachHang::findOrFail($id);
-        $khachhang->delete();
+        $khachhang = KhachHang::with('taikhoan')->findOrFail($id);
+
+        if ($khachhang->taikhoan) {
+            $khachhang->taikhoan->delete(); // Xoá mềm tài khoản khách hàng
+        }
+
+        $khachhang->delete(); // Xoá mềm khách hàng
 
         LogService::log('Xoá khách hàng ID: ' . $id, 'khachhangs');
 
-        return response()->json(['message' => 'Đã xoá khách hàng']);
+        return response()->json(['message' => 'Đã xoá khách hàng và tài khoản liên quan']);
     }
+
 }
