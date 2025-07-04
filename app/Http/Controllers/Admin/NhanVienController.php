@@ -10,10 +10,11 @@ use App\Services\LogService;
 class NhanVienController extends Controller
 {
     public function index()
-    {
-        return NhanVien::with('taikhoan')->get(); // Trả kèm thông tin tài khoản nếu có
-    }
-
+{
+    return NhanVien::with('taikhoan')
+        ->orderBy('id_nhanvien', 'asc')
+        ->get();
+}
   public function store(Request $request)
 {
     // Lấy dữ liệu từ mảng lồng nhau `taikhoan`
@@ -108,5 +109,15 @@ class NhanVienController extends Controller
 
         return response()->json(['message' => 'Đã xoá nhân viên và tài khoản liên quan']);
     }
+    public function getByKhoa($id_khoa)
+{
+    $bacsi = \App\Models\NhanVien::where('id_khoa', $id_khoa)
+        ->where('chucvu', 'bacsi')
+        ->with(['taikhoan:id_taikhoan,id_nguoidung,hoten'])
+        ->get(['id_nhanvien', 'id_khoa']); // không select 'hoten' ở đây
+
+    return response()->json($bacsi);
+}
+
 
 }

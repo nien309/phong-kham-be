@@ -16,6 +16,7 @@ class CreateLichhenTable extends Migration
             $table->unsignedBigInteger('id_khachhang');
             $table->unsignedBigInteger('id_nhanvien');
             $table->unsignedBigInteger('id_cakham');
+            
 
             // Nội dung lịch hẹn
             $table->date('ngayhen');

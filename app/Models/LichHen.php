@@ -16,9 +16,18 @@ class LichHen extends Model
         'id_khachhang',
         'id_nhanvien',
         'id_cakham',
+        'id_khoa',
         'ngayhen',
         'ghichu',
         'trangthai',
+    ];
+    const TRANG_THAI = [
+        'chờ xác nhận',
+        'đã xác nhận',
+        'chuyển đến bác sĩ',
+        'chuyển đến lễ tân',
+        'hoàn thành',
+        'đã huỷ',
     ];
 
     protected $dates = ['deleted_at'];
@@ -37,4 +46,9 @@ class LichHen extends Model
     {
         return $this->belongsTo(CaKham::class, 'id_cakham', 'id_cakham');
     }
+    public function khoa()
+    {
+        return $this->belongsTo(Khoa::class, 'id_khoa', 'id_khoa');
+    }
+
 }

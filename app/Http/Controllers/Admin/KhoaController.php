@@ -9,7 +9,9 @@ class KhoaController extends Controller
 {
     public function index()
     {
-        return Khoa::with('nhanviens', 'dichvus')->get();
+        return Khoa::with('nhanviens', 'dichvus')
+            ->orderBy('id_khoa', 'asc')
+            ->get();
     }
 
     public function store(Request $request)

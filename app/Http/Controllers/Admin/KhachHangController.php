@@ -12,7 +12,10 @@ class KhachHangController extends Controller
 {
     public function index()
     {
-        return KhachHang::with('taikhoan')->get(); // Trả kèm thông tin tài khoản
+       return KhachHang::with('taikhoan')
+        ->orderBy('id_khachhang', 'asc')
+        ->get();
+        
     }
 
     public function store(Request $request)
