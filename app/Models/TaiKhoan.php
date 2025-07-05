@@ -21,13 +21,19 @@ class TaiKhoan extends Authenticatable
 
     protected $hidden = ['matkhau'];
 
-    public function nguoidung()
-    {
-        return match ($this->loai_taikhoan) {
-            'khachhang' => $this->belongsTo(KhachHang::class, 'id_nguoidung'),
-            'nhanvien' => $this->belongsTo(NhanVien::class, 'id_nguoidung'),
-            default => null,
-        };
+  public function nguoidung()
+{
+    if ($this->loai_taikhoan === 'khachhang') {
+        return $this->belongsTo(KhachHang::class, 'id_nguoidung');
     }
+
+    if ($this->loai_taikhoan === 'nhanvien') {
+        return $this->belongsTo(NhanVien::class, 'id_nguoidung');
+    }
+
+    // ✅ Quan trọng: luôn trả về quan hệ trống để tránh lỗi
+    return $this->belongsTo(NhanVien::class, 'id_nguoidung')->whereNull('id_nhanvien'); // luôn trả về query rỗng
+}
+
 }
 

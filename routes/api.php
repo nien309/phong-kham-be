@@ -4,8 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AdminTaiKhoanController;
+
+
 use App\Http\Controllers\Admin\{
-    CaKhamController, LichHenController, NhanVienController, KhachHangController, KhoaController as AdminKhoaController, DichVuController as AdminDichVuController
+    CaKhamController, LichHenController, NhanVienController, KhachHangController,LichDangKyLamViecController,LichLamViecController, KhoaController as AdminKhoaController, DichVuController as AdminDichVuController
 };
 use App\Http\Controllers\KhoaController;
 
@@ -25,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/update', [AuthController::class, 'update']);
     Route::get('/user', fn(Request $request) => $request->user());
+    Route::apiResource('lich-dang-ky', LichDangKyLamViecController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
 
     // 🟩 KHÁCH HÀNG ĐẶT LỊCH
    Route::post('/lichhen', [LichHenController::class, 'datLich']);
@@ -47,6 +50,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('lichhen/capnhat-trangthai/{id}', [LichHenController::class, 'capNhatTrangThai']);
         Route::apiResource('nhanviens', NhanVienController::class)->only(['index', 'store', 'update', 'destroy', 'show']);
         Route::apiResource('khachhangs', KhachHangController::class)->only(['index', 'store', 'update', 'destroy', 'show']);
+        Route::get('/lich-lam-viec', [LichLamViecController::class, 'index']);
+
+        Route::get('/lich-lam-viec/tim', [LichLamViecController::class, 'tim']);
+
     });
 
     // Dành cho khách (nếu sau này có)

@@ -12,15 +12,23 @@ class KhoaController extends Controller
         return Khoa::with('nhanviens', 'dichvus')->get();
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'tenkhoa' => 'required|string',
-            'trangthai' => 'required|in:hoatdong,tamngung',
-        ]);
+   public function store(Request $request)
+{
+    $validated = $request->validate([
+        'tenkhoa' => [
+            'required',
+            'string',
+            Rule::unique('khoas', 'tenkhoa')->where(function ($query) {
+                return $query->whereNull('deleted_at');
+            }),
+        ],
+        'trangthai' => 'required|in:hoatdong,tamngung',
+    ], [
+        'tenkhoa.unique' => 'Tên khoa đã tồn tại.',
+    ]);
 
-        return Khoa::create($validated);
-    }
+    return Khoa::create($validated);
+}
 
     public function show($id)
     {

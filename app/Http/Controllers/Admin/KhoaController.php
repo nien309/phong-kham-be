@@ -5,6 +5,8 @@ use App\Models\Khoa;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\LogService;
+use Illuminate\Validation\Rule;
+
 class KhoaController extends Controller
 {
     public function index()
@@ -17,12 +19,19 @@ class KhoaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'tenkhoa' => 'required|string',
-            'trangthai' => 'required|in:hoatdong,tamngung',
-        ]);
+        'tenkhoa' => [
+            'required',
+            'string',
+            Rule::unique('khoas', 'tenkhoa')->where(function ($query) {
+                return $query->whereNull('deleted_at');
+            }),
+        ],
+        'trangthai' => 'required|in:hoatdong,tamngung',
+    ], [
+        'tenkhoa.unique' => 'Tên khoa đã tồn tại.',
+    ]);
 
-        LogService::log('Tạo khoa mới: ' . $request->tenkhoa, 'khoas');
-        return Khoa::create($validated);
+    return Khoa::create($validated);
     }
 
     public function show($id)

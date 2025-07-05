@@ -16,7 +16,8 @@ class AddForeignKeyIdKhoaToLichhen extends Migration
         Schema::table('lichhen', function (Blueprint $table) {
             // THÊM cột nếu chưa có
             if (!Schema::hasColumn('lichhen', 'id_khoa')) {
-                $table->unsignedBigInteger('id_khoa')->after('id_nhanvien');
+             $table->unsignedBigInteger('id_khoa')->nullable()->after('id_nhanvien');
+  
             }
 
             // TẠO foreign key
