@@ -8,7 +8,10 @@ use App\Models\TaiKhoan; // ✅ Đúng vị trí
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Services\LogService;
-
+use App\Models\NhanVien;
+use App\Models\LichLamViec;
+use App\Models\CaKham;
+use App\Models\Khoa;
 class LichHenController extends Controller
 {
     public function index()
@@ -55,8 +58,27 @@ class LichHenController extends Controller
         $validated['id_khachhang'] = $khachhang->id_khachhang;
         $validated['trangthai'] = 'chờ xác nhận';
 
-        return LichHen::create($validated);
-    }
+        // Kiểm tra bác sĩ đó có lịch làm việc đúng ngày & ca không?
+        $lichBacSi = LichLamViec::where('id_nhanvien', $validated['id_nhanvien'])->get();
+
+        $hopLe = false;
+
+        foreach ($lichBacSi as $lich) {
+            $json = json_decode($lich->thoigianlamviec, true);
+            foreach ($json as $ngayCa) {
+                if ($ngayCa['ngay'] === $validated['ngayhen'] && in_array($validated['id_cakham'], $ngayCa['ca'])) {
+                    $hopLe = true;
+                    break 2;
+                }
+            }
+        }
+
+        if (!$hopLe) {
+            return response()->json(['error' => 'Bác sĩ không có lịch làm việc phù hợp.'], 422);
+        }
+
+                return LichHen::create($validated);
+            }
 
 
     
@@ -99,4 +121,39 @@ class LichHenController extends Controller
 
         return $lichhen;
     }
+    
+
+public function layBacSiTheoLichRanh(Request $request, $id_khoa)
+{
+    $request->validate([
+        'ngayhen' => 'required|date',
+        'id_cakham' => 'required|exists:cakham,id_cakham',
+    ]);
+
+    $ngayhen = $request->input('ngayhen');
+    $id_cakham = $request->input('id_cakham');
+
+    // Lấy danh sách bác sĩ trong khoa
+    $dsBacSi = NhanVien::where('id_khoa', $id_khoa)->get();
+
+    $dsBacSiRanh = [];
+
+    foreach ($dsBacSi as $bacsi) {
+        // Lấy lịch làm việc của bác sĩ
+        $lich = LichLamViec::where('id_nhanvien', $bacsi->id_nhanvien)->get();
+
+        foreach ($lich as $lichlam) {
+            $lichGiaiMa = json_decode($lichlam->thoigianlamviec, true);
+            foreach ($lichGiaiMa as $ngayCa) {
+                if ($ngayCa['ngay'] === $ngayhen && in_array($id_cakham, $ngayCa['ca'])) {
+                    $dsBacSiRanh[] = $bacsi;
+                    break 2; // tìm thấy bác sĩ hợp lệ rồi, qua bác sĩ khác
+                }
+            }
+        }
+    }
+
+    return response()->json($dsBacSiRanh);
+}
+
 }

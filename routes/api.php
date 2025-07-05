@@ -21,6 +21,8 @@ Route::get('/khoas', [KhoaController::class, 'index']);
 Route::get('/khoas/{id}', [KhoaController::class, 'show']);
 Route::get('/cakham', [CaKhamController::class, 'index']);
 Route::get('/nhanviens/khoas/{id_khoa}', [NhanVienController::class, 'getByKhoa']);
+Route::get('khoa/{id_khoa}/bac-si-lich-ranh', [LichHenController::class, 'layBacSiTheoLichRanh']);
+
 
 // ✨ AUTHENTICATED ROUTES
 Route::middleware('auth:sanctum')->group(function () {
