@@ -111,32 +111,45 @@ class LichDangKyLamViecController extends Controller
     $validated = $request->validate([
         'thangnam' => 'sometimes|string',
         'thoigiandangky' => 'sometimes|json',
-        'trangthai' => 'in:chờ duyệt,đã duyệt',
-        'ghichu' => 'nullable|string'
+        'trangthai' => 'sometimes|in:chờ duyệt,đã duyệt,từ chối',
+        'ghichu' => 'nullable|string',
     ]);
 
-    // Nếu có thoigiandangky gửi lên là JSON chuỗi, cần decode
+    // Giải mã JSON nếu có
     if (isset($validated['thoigiandangky']) && is_string($validated['thoigiandangky'])) {
         $validated['thoigiandangky'] = json_decode($validated['thoigiandangky'], true);
     }
 
-    // Cập nhật trạng thái
-    if (isset($validated['trangthai']) && $validated['trangthai'] === 'đã duyệt' && $lich->trangthai !== 'đã duyệt') {
-        // Sinh ra lịch làm việc mới
+    // Kiểm tra và xử lý theo trạng thái
+    if (
+        isset($validated['trangthai']) &&
+        $validated['trangthai'] === 'đã duyệt' &&
+        $lich->trangthai !== 'đã duyệt'
+    ) {
+        // Tạo lịch làm việc mới
         \App\Models\LichLamViec::create([
             'id_nhanvien' => $lich->id_nhanvien,
-            'thoigianlamviec' => $lich->thoigiandangky, // là JSON dạng chuỗi
+            'thoigianlamviec' => $lich->thoigiandangky,
             'ngaytao' => now(),
-            'trangthai' => 'đang làm', // hoặc giá trị mặc định bạn định nghĩa
+            'trangthai' => 'đang làm',
             'is_dinhky' => false,
             'lydothaydoi' => null,
         ]);
     }
 
+    if (
+        isset($validated['trangthai']) &&
+        $validated['trangthai'] === 'từ chối' &&
+        $lich->trangthai !== 'từ chối'
+    ) {
+        // Ghi lại lý do từ chối nếu có
+        $validated['ghichu'] = $validated['ghichu'] ?? 'Yêu cầu đã bị từ chối';
+    }
+
     // Cập nhật bản ghi gốc
     $lich->update([
         'thangnam' => $validated['thangnam'] ?? $lich->thangnam,
-        'thoigiandangky' => json_encode($validated['thoigiandangky'] ?? json_decode($lich->thoigiandangky, true)),
+        'thoigiandangky' => isset($validated['thoigiandangky']) ? json_encode($validated['thoigiandangky']) : $lich->thoigiandangky,
         'trangthai' => $validated['trangthai'] ?? $lich->trangthai,
         'ghichu' => $validated['ghichu'] ?? $lich->ghichu,
     ]);
@@ -146,6 +159,7 @@ class LichDangKyLamViecController extends Controller
         'data' => $lich
     ]);
 }
+
 
     public function destroy($id)
     {

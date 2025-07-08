@@ -4,6 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\AdminTaiKhoanController;
+use App\Http\Controllers\HosoBenhAnController;
+use App\Http\Controllers\BenhAnController;
+use App\Http\Controllers\ThongtinkhambenhController;
+use App\Http\Controllers\ToaThuocController;
+use App\Http\Controllers\HoaDonController;
 
 
 use App\Http\Controllers\Admin\{
