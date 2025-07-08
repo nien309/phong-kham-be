@@ -23,20 +23,20 @@ class HosoBenhAnController extends Controller
     // 🧿 Tạo hồ sơ bệnh án (chỉ lễ tân)
     public function store(Request $request)
     {
-        $user = Auth::user();
-        if ($user->chucvu !== 'letan') {
+        $user = Auth::user()->load('nhanvien');
+        if ($user->nhanvien->chucvu !== 'letan') {
             return response()->json(['message' => 'Chỉ lễ tân được phép tạo hồ sơ'], 403);
         }
 
         $validated = $request->validate([
-            'id_khachhang' => 'required|exists:khachhangs,id_khachhang',
+            'id_khachhang' => 'required',
         ]);
 
         $hoso = HosoBenhAn::create([
             'id_khachhang' => $validated['id_khachhang'],
         ]);
 
-        LogService::log('Tạo hồ sơ bệnh án ID: ' . $hoso->id_hosobenhan, 'hosobenhan');
+        // LogService::log('Tạo hồ sơ bệnh án ID: ' . $hoso->id_hosobenhan, 'hosobenhan');
 
         return response()->json($hoso, 201);
     }
@@ -44,42 +44,56 @@ class HosoBenhAnController extends Controller
     // 🧿 Xem 1 hồ sơ (chỉ bác sĩ/khách hàng xem hồ sơ của mình)
     public function show($id)
     {
+        $user = Auth::user()->load('nhanvien');
         $hoso = HosoBenhAn::with('benhans')->findOrFail($id);
-        $user = Auth::user();
 
+        // 👉 Nếu là khách hàng thì kiểm tra quyền sở hữu hồ sơ
         if ($user->loai_taikhoan === 'khachhang') {
-        $khachhang = \App\Models\KhachHang::where('id_taikhoan', $user->id_taikhoan)->first();
+        $khachhang = \App\Models\KhachHang::find($user->id_nguoidung);
+
         if (!$khachhang || $hoso->id_khachhang !== $khachhang->id_khachhang) {
             return response()->json(['message' => 'Bạn không được phép xem hồ sơ này'], 403);
         }
-        } elseif (!in_array($user->chucvu ?? null, ['bacsi', 'dieuduong'])) {
+
+        return response()->json($hoso);
+    }
+
+
+        // 👉 Nếu là nhân viên (bacsi, dieuduong)
+        $chucvu = $user->nhanvien->chucvu ?? null;
+
+        if (!in_array($chucvu, ['bacsi', 'dieuduong'])) {
             return response()->json(['message' => 'Không có quyền truy cập'], 403);
         }
 
         return response()->json($hoso);
     }
 
-    // 🧿 Cập nhật trạng thái (chỉ bác sĩ)
-    public function update(Request $request, $id)
-    {
-        $user = Auth::user();
-        if ($user->chucvu !== 'bacsi') {
-            return response()->json(['message' => 'Chỉ bác sĩ được phép cập nhật'], 403);
-        }
 
-        $hoso = HosoBenhAn::findOrFail($id);
-        $request->validate([
-            'trangthai' => 'in:dang_dieu_tri,hoan_thanh,huy',
-        ]);
+//    public function update(Request $request, $id)
+//     {
+//         $user = Auth::user()->load('nhanvien');
+//         $chucvu = $user->nhanvien->chucvu ?? null;
 
-        $hoso->update([
-            'trangthai' => $request->trangthai,
-        ]);
+//         if ($chucvu !== 'bacsi') {
+//             return response()->json(['message' => 'Chỉ bác sĩ được phép cập nhật'], 403);
+//         }
 
-        LogService::log('Cập nhật hồ sơ bệnh án ID: ' . $id, 'hosobenhan');
+//         $hoso = HosoBenhAn::findOrFail($id);
 
-        return response()->json($hoso);
-    }
+//         $request->validate([
+//             'trangthai' => 'required|in:dang_dieu_tri,hoan_thanh,huy',
+//         ]);
+
+//         $hoso->update([
+//             'trangthai' => $request->trangthai,
+//         ]);
+
+//         LogService::log('Cập nhật hồ sơ bệnh án ID: ' . $id, 'hosobenhan');
+
+//         return response()->json($hoso);
+//     }
+
 
     // 🧿 Xoá mềm (chỉ bác sĩ)
     // public function destroy($id)

@@ -20,6 +20,10 @@ class TaiKhoan extends Authenticatable
 ];
 
     protected $hidden = ['matkhau'];
+public function nhanvien()
+{
+    return $this->belongsTo(NhanVien::class, 'id_nguoidung');
+}
 
   public function nguoidung()
 {
