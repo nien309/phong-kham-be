@@ -30,6 +30,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update', [AuthController::class, 'update']);
     Route::get('/user', fn(Request $request) => $request->user());
     Route::apiResource('lich-dang-ky', LichDangKyLamViecController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::apiResource('hosobenhan', HosoBenhAnController::class);
+    Route::apiResource('benhan', BenhanController::class)->except(['destroy']);
+    Route::apiResource('thongtinkhambenh', ThongTinKhamBenhController::class);
+    Route::post('chidinh', [ChiDinhController::class, 'store']);
+    Route::put('chidinh/{id}', [ChiDinhController::class, 'update']);
+    Route::get('chidinh/{id}', [ChiDinhController::class, 'show']);
+
+    Route::post('toathuoc', [ToaThuocController::class, 'store']);
+    Route::put('toathuoc/{id}', [ToaThuocController::class, 'update']);
+    Route::get('toathuoc/{id}', [ToaThuocController::class, 'show']);
+
+    Route::post('hoadon', [HoaDonController::class, 'store']);
+    Route::put('hoadon/{id}', [HoaDonController::class, 'update']);
+    Route::get('hoadon/{id}', [HoaDonController::class, 'show']);
+
+
 
     // 🟩 KHÁCH HÀNG ĐẶT LỊCH
    Route::post('/lichhen', [LichHenController::class, 'datLich']);

@@ -9,9 +9,22 @@ use Illuminate\Http\Request;
 class LichDangKyLamViecController extends Controller
 {
     public function index()
-    {
-        return LichDangKyLamViec::with('nhanvien')->get();
-    }
+{
+    $dsLich = LichDangKyLamViec::with([
+        'nhanvien.taikhoan:id_taikhoan,id_nguoidung,hoten',
+        'nhanvien.khoa:id_khoa,tenkhoa'
+    ])->get();
+
+    $dsLich = $dsLich->map(function ($lich) {
+        $lich->thoigiandangky = json_decode($lich->thoigiandangky, true);
+        return $lich;
+    });
+
+    return response()->json([
+        'message' => 'Danh sách lịch đăng ký',
+        'data' => $dsLich
+    ]);
+}
 
     public function store(Request $request)
 {
@@ -75,10 +88,21 @@ class LichDangKyLamViecController extends Controller
     ], 201);
 }
 
-    public function show($id)
-    {
-        return LichDangKyLamViec::with('nhanvien')->findOrFail($id);
-    }
+  public function show($id)
+{
+    $lich = LichDangKyLamViec::with([
+        'nhanvien.taikhoan:id_taikhoan,id_nguoidung,hoten', // lấy hoten từ tai_khoan
+        'nhanvien.khoa:id_khoa,tenkhoa',
+    ])->findOrFail($id);
+
+    $lich->thoigiandangky = json_decode($lich->thoigiandangky, true);
+
+    return response()->json(
+        $lich
+    );
+}
+
+
 
     public function update(Request $request, $id)
 {
