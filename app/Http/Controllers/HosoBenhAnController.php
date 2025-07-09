@@ -70,45 +70,42 @@ class HosoBenhAnController extends Controller
     }
 
 
-//    public function update(Request $request, $id)
-//     {
-//         $user = Auth::user()->load('nhanvien');
-//         $chucvu = $user->nhanvien->chucvu ?? null;
+// File: app/Http/Controllers/HosoBenhAnController.php
 
-//         if ($chucvu !== 'bacsi') {
-//             return response()->json(['message' => 'Chỉ bác sĩ được phép cập nhật'], 403);
-//         }
+public function searchByPhone(Request $request)
+{
+    $user = Auth::user()->load('nhanvien');
 
-//         $hoso = HosoBenhAn::findOrFail($id);
+    // 👉 Chỉ cho bác sĩ hoặc lễ tân tìm kiếm
+    $chucvu = $user->nhanvien->chucvu ?? null;
+    if (!in_array($chucvu, ['bacsi', 'letan'])) {
+        return response()->json(['message' => 'Không có quyền tìm kiếm hồ sơ'], 403);
+    }
 
-//         $request->validate([
-//             'trangthai' => 'required|in:dang_dieu_tri,hoan_thanh,huy',
-//         ]);
+    $request->validate([
+        'sdt' => 'required|string',
+    ]);
 
-//         $hoso->update([
-//             'trangthai' => $request->trangthai,
-//         ]);
+    // Vì sdt nằm ở bảng taikhoans nên phải whereHas
+    $khachhang = \App\Models\KhachHang::whereHas('taikhoan', function($query) use ($request) {
+        $query->where('sdt', $request->sdt);
+    })->with('taikhoan')->first();
 
-//         LogService::log('Cập nhật hồ sơ bệnh án ID: ' . $id, 'hosobenhan');
+    if (!$khachhang) {
+        return response()->json(['message' => 'Không tìm thấy khách hàng với số điện thoại này'], 404);
+    }
 
-//         return response()->json($hoso);
-//     }
+    // Tìm tất cả hồ sơ bệnh án của khách hàng này
+    $hoso = HosoBenhAn::with('benhans', 'khachhang')
+                ->where('id_khachhang', $khachhang->id_khachhang)
+                ->get();
 
+    if ($hoso->isEmpty()) {
+        return response()->json(['message' => 'Khách hàng này chưa có hồ sơ bệnh án'], 404);
+    }
 
-    // 🧿 Xoá mềm (chỉ bác sĩ)
-    // public function destroy($id)
-    // {
-    //     $user = Auth::user();
-    //     if ($user->chucvu !== 'bacsi') {
-    //         return response()->json(['message' => 'Chỉ bác sĩ được xoá hồ sơ'], 403);
-    //     }
+    return response()->json($hoso);
+}
 
-    //     $hoso = HosoBenhAn::findOrFail($id);
-    //     $hoso->delete();
-
-    //     LogService::log('Xoá hồ sơ bệnh án ID: ' . $id, 'hosobenhan');
-
-    //     return response()->json(['message' => 'Đã xoá hồ sơ bệnh án']);
-    // }
 }
 

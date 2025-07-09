@@ -141,4 +141,32 @@ class KhachHangController extends Controller
         return response()->json(['message' => 'Đã xoá khách hàng và tài khoản liên quan']);
     }
 
+    public function search(Request $request)
+{
+    $request->validate([
+        'sdt'   => 'nullable|string',
+        'hoten' => 'nullable|string',
+    ]);
+
+    if (!$request->sdt && !$request->hoten) {
+        return response()->json(['message' => 'Phải nhập ít nhất số điện thoại hoặc họ tên'], 422);
+    }
+
+    $khachhangs = \App\Models\KhachHang::whereHas('taikhoan', function($q) use ($request) {
+        if ($request->sdt) {
+            $q->where('sdt', $request->sdt);
+        }
+        if ($request->hoten) {
+            $q->where('hoten', 'ilike', '%' . $request->hoten . '%');
+        }
+    })->with('taikhoan')->get();
+
+    if ($khachhangs->isEmpty()) {
+        return response()->json(['message' => 'Không tìm thấy khách hàng'], 404);
+    }
+
+    return response()->json($khachhangs);
+}
+
+
 }

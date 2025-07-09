@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('hoadon', [HoaDonController::class, 'store']);
     Route::put('hoadon/{id}', [HoaDonController::class, 'update']);
     Route::get('hoadon/{id}', [HoaDonController::class, 'show']);
+    Route::post('/hosobenhan/search-by-phone', [HosoBenhAnController::class, 'searchByPhone']);
 
 
 
@@ -74,6 +75,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('nhanviens', NhanVienController::class)->only(['index', 'store', 'update', 'destroy', 'show']);
         Route::apiResource('khachhangs', KhachHangController::class)->only(['index', 'store', 'update', 'destroy', 'show']);
         Route::get('/lich-lam-viec', [LichLamViecController::class, 'index']);
+       
+        Route::post('/nhanviens/search', [NhanVienController::class, 'search']);
+     
+        Route::post('/khachhangs/search', [KhachHangController::class, 'search']);
 
         Route::get('/lich-lam-viec/tim', [LichLamViecController::class, 'tim']);
 

@@ -118,6 +118,34 @@ class NhanVienController extends Controller
 
     return response()->json($bacsi);
 }
+public function search(Request $request)
+{
+    $request->validate([
+        'hoten' => 'nullable|string',
+        'sdt'   => 'nullable|string',
+    ]);
+
+    if (!$request->sdt && !$request->hoten) {
+        return response()->json(['message' => 'Phải nhập ít nhất số điện thoại hoặc tên'], 422);
+    }
+
+    $nhanviens = \App\Models\NhanVien::whereHas('taikhoan', function($q) use ($request) {
+        if ($request->sdt) {
+            $q->where('sdt', $request->sdt);
+        }
+        if ($request->hoten) {
+            $q->where('hoten', 'ilike', '%' . $request->hoten . '%'); // hoặc 'like' nếu dùng MySQL
+        }
+    })->with('taikhoan')->get();
+
+    if ($nhanviens->isEmpty()) {
+        return response()->json(['message' => 'Không tìm thấy nhân viên'], 404);
+    }
+
+    return response()->json($nhanviens);
+}
+
+
 
 
 }
