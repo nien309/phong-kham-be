@@ -31,6 +31,7 @@ Route::get('khoa/{id_khoa}/bac-si-lich-ranh', [LichHenController::class, 'layBac
 
 // ✨ AUTHENTICATED ROUTES
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/update', [AuthController::class, 'update']);
     Route::get('/user', fn(Request $request) => $request->user());
@@ -60,7 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('check.admin')->prefix('admin')->group(function () {
         Route::get('/taikhoan', [AdminTaiKhoanController::class, 'index']);
         Route::post('/taikhoan', [AdminTaiKhoanController::class, 'createFromAdmin']);
-        Route::get('/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
         Route::put('/taikhoan/{id}', [AdminTaiKhoanController::class, 'update']);
         Route::delete('/taikhoan/{id}', [AdminTaiKhoanController::class, 'destroy']);
 
