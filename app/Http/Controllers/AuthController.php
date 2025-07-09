@@ -40,6 +40,7 @@ class AuthController extends Controller
         'ngaysinh' => $request->ngaysinh ?? now(),
         'diachi' => $request->diachi ?? '',
         'loai_taikhoan' => 'khachhang', // không để user chọn
+        'phan_quyen' => 'khachhang',
         'id_nguoidung' => $nguoidung->getKey(),
     ]);
 
