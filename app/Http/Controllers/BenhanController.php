@@ -80,22 +80,29 @@ class BenhanController extends Controller
      */
     public function show($id)
 {
-    $benhan = Benhan::with(['thongtinkhambenh', 'khoa', 'nhanvien'])->findOrFail($id);
+    $benhan = Benhan::with(['hosobenhan', 'thongtinkhambenh', 'khoa', 'nhanvien'])
+        ->findOrFail($id);
 
     $user = Auth::user();
 
     if ($user->loai_taikhoan === 'khachhang') {
-        $khachhang = KhachHang::where('id_khachhang', $user->id_nguoidung)->first();
-        if (!$khachhang || $benhan->hosobenhan->id_khachhang !== $khachhang->id_khachhang) {
+        // Lấy khách hàng qua quan hệ
+        $khachhang = $user->nguoidung;
+
+        if (!$khachhang) {
+            return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
+        }
+
+        if (!$benhan->hosobenhan || $benhan->hosobenhan->id_khachhang !== $khachhang->id_khachhang) {
             return response()->json(['message' => 'Bạn không được phép xem bệnh án này'], 403);
         }
+
     } elseif (!in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
         return response()->json(['message' => 'Không có quyền truy cập'], 403);
     }
 
     return response()->json($benhan);
 }
-
 
     /**
      * 📌 Cập nhật bệnh án (bác sĩ hoặc điều dưỡng)
