@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\LichHen;
 use App\Models\TaiKhoan; // ✅ Đúng vị trí
@@ -125,35 +125,58 @@ class LichHenController extends Controller
 
 public function layBacSiTheoLichRanh(Request $request, $id_khoa)
 {
-    $request->validate([
-        'ngayhen' => 'required|date',
-        'id_cakham' => 'required|exists:cakham,id_cakham',
-    ]);
-
     $ngayhen = $request->input('ngayhen');
     $id_cakham = $request->input('id_cakham');
 
-    // Lấy danh sách bác sĩ trong khoa
+    // Validate input
+    // $validator = Validator::make($request->all(), [
+    //     'ngayhen' => 'required|date_format:Y-m-d',
+    //     'id_cakham' => 'required|integer|min:1',
+    // ]);
+
+    // if ($validator->fails()) {
+    //     return response()->json(['errors' => $validator->errors()], 400);
+    // }
+
+    // Get all doctors in the department
     $dsBacSi = NhanVien::where('id_khoa', $id_khoa)->get();
 
     $dsBacSiRanh = [];
 
     foreach ($dsBacSi as $bacsi) {
-        // Lấy lịch làm việc của bác sĩ
-        $lich = LichLamViec::where('id_nhanvien', $bacsi->id_nhanvien)->get();
+        // Get active work schedules for this doctor
+        $lichLamViec = LichLamViec::where('id_nhanvien', $bacsi->id_nhanvien)
+            ->where('trangthai', 'đang làm')
+            ->get();
 
-        foreach ($lich as $lichlam) {
-            $lichGiaiMa = json_decode($lichlam->thoigianlamviec, true);
-            foreach ($lichGiaiMa as $ngayCa) {
-                if ($ngayCa['ngay'] === $ngayhen && in_array($id_cakham, $ngayCa['ca'])) {
+        foreach ($lichLamViec as $lich) {
+            $thoigianLamViec = json_decode($lich->thoigianlamviec, true);
+            
+            if (!is_array($thoigianLamViec)) {
+                continue; // Skip if data is invalid
+            }
+
+            foreach ($thoigianLamViec as $ngayCa) {
+                // Check if the date matches and the shift is included
+                if (isset($ngayCa['ngay']) && 
+                    $ngayCa['ngay'] === $ngayhen && 
+                    isset($ngayCa['ca']) && 
+                    is_array($ngayCa['ca']) && 
+                    in_array($id_cakham, $ngayCa['ca'])) {
+                    
+                    // Add doctor to available list
                     $dsBacSiRanh[] = $bacsi;
-                    break 2; // tìm thấy bác sĩ hợp lệ rồi, qua bác sĩ khác
+                    break 2; // Move to next doctor
                 }
             }
         }
     }
 
-    return response()->json($dsBacSiRanh);
+    // Remove duplicates (in case a doctor has multiple matching schedules)
+    $dsBacSiRanh = array_unique($dsBacSiRanh, SORT_REGULAR);
+
+    Log::info('Available doctors found', ['count' => count($dsBacSiRanh)]);
+    return response()->json(array_values($dsBacSiRanh));
 }
 
 }

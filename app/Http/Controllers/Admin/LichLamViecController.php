@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LichLamViec;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
 class LichLamViecController extends Controller
 {
     public function index()
@@ -31,20 +31,22 @@ class LichLamViecController extends Controller
     {
         $query = LichLamViec::query();
 
-        if ($request->has('id_nhanvien')) {
-            $query->where('id_nhanvien', $request->input('id_nhanvien'));
+        // if ($request->has('id_nhanvien')) {
+        //     $query->where('id_nhanvien', $request->input('id_nhanvien'));
+        // }
+  if ($request->has('ngay')) {
+            $query->whereJsonContains('thoigianlamviec', [['ngay' => $request->ngay]]);
         }
 
-        if ($request->has('ngay')) {
-            $query->whereDate('ngaytao', $request->input('ngay'));
-        }
+ 
 
-        if ($request->has('thangnam')) {
-            $thangnam = $request->input('thangnam'); // dạng: "07-2025"
-            [$thang, $nam] = explode('-', $thangnam);
-            $query->whereMonth('ngaytao', $thang)->whereYear('ngaytao', $nam);
-        }
+        // if ($request->has('thangnam')) {
+        //     $thangnam = $request->input('thangnam'); // dạng: "07-2025"
+        //     [$thang, $nam] = explode('-', $thangnam);
+        //     $query->whereMonth('ngaytao', $thang)->whereYear('ngaytao', $nam);
+        // }
+$results = $query->get();
 
-        return $query->with('nhanvien')->get();
+        return response()->json($results);
     }
 }
