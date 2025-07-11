@@ -168,4 +168,11 @@ class LichDangKyLamViecController extends Controller
 
         return response()->json(['message' => 'Đã xoá mềm lịch đăng ký']);
     }
+    public function destroyAll()
+{
+    LichDangKyLamViec::query()->delete(); // Xoá mềm tất cả
+
+    return response()->json(['message' => 'Đã xoá hết lịch, sẵn sàng nhập lại mới!']);
+}
+
 }

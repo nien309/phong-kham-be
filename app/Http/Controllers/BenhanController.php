@@ -18,17 +18,17 @@ class BenhanController extends Controller
     {
         $user = Auth::user()->load('nhanvien');
 
-        if ($user->loai_taikhoan === 'khachhang') {
-            $khachhang = KhachHang::where('id_taikhoan', $user->id_taikhoan)->first();
+        // if ($user->loai_taikhoan === 'khachhang') {
+        //     $khachhang = KhachHang::where('id_taikhoan', $user->id_taikhoan)->first();
 
-            if (!$khachhang) {
-                return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
-            }
+        //     if (!$khachhang) {
+        //         return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
+        //     }
 
-            return Benhan::whereHas('hosobenhan', function ($q) use ($khachhang) {
-                $q->where('id_khachhang', $khachhang->id_khachhang);
-            })->with(['hosobenhan', 'khoa'])->get();
-        }
+        //     return Benhan::whereHas('hosobenhan', function ($q) use ($khachhang) {
+        //         $q->where('id_khachhang', $khachhang->id_khachhang);
+        //     })->with(['hosobenhan', 'khoa'])->get();
+        // }
 
         if (!in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
             return response()->json(['message' => 'Không có quyền truy cập'], 403);
@@ -39,6 +39,26 @@ class BenhanController extends Controller
                      ->with(['hosobenhan', 'khoa'])
                      ->get();
     }
+
+    public function benhanCuaToi()
+{
+    $user = Auth::user();
+
+    if ($user->loai_taikhoan !== 'khachhang') {
+        return response()->json(['message' => 'Không có quyền truy cập'], 403);
+    }
+
+    $khachhang = $user->nguoidung;
+    if (!$khachhang) {
+        return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
+    }
+
+    $benhans = Benhan::whereHas('hosobenhan', function ($q) use ($khachhang) {
+        $q->where('id_khachhang', $khachhang->id_khachhang);
+    })->with(['hosobenhan', 'khoa', 'nhanvien'])->get();
+
+    return response()->json($benhans);
+}
 
     /**
      * 📌 Tạo bệnh án (bác sĩ)
@@ -83,10 +103,9 @@ class BenhanController extends Controller
     $benhan = Benhan::with(['hosobenhan', 'thongtinkhambenh', 'khoa', 'nhanvien'])
         ->findOrFail($id);
 
-    $user = Auth::user();
+    $user = Auth::user()->load('nhanvien');
 
     if ($user->loai_taikhoan === 'khachhang') {
-        // Lấy khách hàng qua quan hệ
         $khachhang = $user->nguoidung;
 
         if (!$khachhang) {
@@ -97,7 +116,13 @@ class BenhanController extends Controller
             return response()->json(['message' => 'Bạn không được phép xem bệnh án này'], 403);
         }
 
-    } elseif (!in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
+    } elseif (in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
+
+        if ($benhan->id_khoa !== $user->nhanvien->id_khoa) {
+            return response()->json(['message' => 'Bạn không được phép xem bệnh án khoa khác'], 403);
+        }
+
+    } else {
         return response()->json(['message' => 'Không có quyền truy cập'], 403);
     }
 
@@ -107,12 +132,12 @@ class BenhanController extends Controller
     /**
      * 📌 Cập nhật bệnh án (bác sĩ hoặc điều dưỡng)
      */
-   public function update(Request $request, $id)
+  public function update(Request $request, $id)
 {
     $user = Auth::user()->load('nhanvien');
 
-    if (!in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
-        return response()->json(['message' => 'Không có quyền cập nhật'], 403);
+    if (($user->nhanvien->chucvu ?? null) !== 'bacsi') {
+        return response()->json(['message' => 'Chỉ bác sĩ được phép cập nhật'], 403);
     }
 
     $benhan = Benhan::with(['khoa', 'nhanvien'])->findOrFail($id);
@@ -133,8 +158,7 @@ class BenhanController extends Controller
 
     return response()->json($benhan);
 }
-
-
+    
     /**
      * ❌ Không hỗ trợ xoá
      */

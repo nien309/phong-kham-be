@@ -38,6 +38,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
     Route::apiResource('lich-dang-ky', LichDangKyLamViecController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::get('/hoso-benh-an-cua-toi', [HosoBenhAnController::class, 'hosoBenhAnCuaToi']);
+    Route::get('/benh-an-cua-toi', [BenhanController::class, 'benhanCuaToi']);
+    Route::get('/thong-tin-kham-benh/cua-toi', [ThongTinKhamBenhController::class, 'thongTinKhamBenhCuaToi']);
 
     Route::apiResource('hosobenhan', HosoBenhAnController::class);
     Route::apiResource('benhan', BenhanController::class)->except(['destroy']);
@@ -68,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/taikhoan', [AdminTaiKhoanController::class, 'createFromAdmin']);
         Route::put('/taikhoan/{id}', [AdminTaiKhoanController::class, 'update']);
         Route::delete('/taikhoan/{id}', [AdminTaiKhoanController::class, 'destroy']);
+        Route::delete('/lich-dang-ky-lam-viec', [LichDangKyLamViecController::class, 'destroyAll']);
 
         Route::apiResource('khoas', AdminKhoaController::class);
         Route::apiResource('dichvus', AdminDichVuController::class);

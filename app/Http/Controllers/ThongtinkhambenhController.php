@@ -9,30 +9,49 @@ use Illuminate\Support\Facades\Auth;
 
 class ThongTinKhamBenhController extends Controller
 {
+    /**
+     * 📌 Lấy danh sách thông tin khám bệnh
+     */
     public function index()
     {
-        $user = Auth::user();
-        if (!in_array($user->chucvu, ['bacsi', 'dieuduong'])) {
+        $user = Auth::user()->load('nhanvien');
+
+        if (!in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
             return response()->json(['message' => 'Không có quyền truy cập'], 403);
         }
 
-        return ThongTinKhamBenh::with(['benhan', 'chidinh', 'toathuoc', 'hoadon'])->get();
+        // Chỉ lấy những TT khám bệnh thuộc khoa của nhân viên
+        $ttkb = ThongTinKhamBenh::whereHas('benhan', function ($q) use ($user) {
+            $q->where('id_khoa', $user->nhanvien->id_khoa);
+        })->with(['benhan', 'chidinh', 'toathuoc', 'hoadon'])->get();
+
+        return response()->json($ttkb);
     }
 
+    /**
+     * 📌 Tạo mới thông tin khám bệnh (Chỉ bác sĩ)
+     */
     public function store(Request $request)
     {
-        $user = Auth::user();
-        if ($user->chucvu !== 'bacsi') {
+        $user = Auth::user()->load('nhanvien');
+
+        if (($user->nhanvien->chucvu ?? null) !== 'bacsi') {
             return response()->json(['message' => 'Chỉ bác sĩ được phép tạo'], 403);
         }
 
         $validated = $request->validate([
-            'id_benhan' => 'required|exists:benhan,id_benhan',
-            'trieuchung' => 'nullable|string',
-            'ngaykham' => 'required|date',
-            'chandoan' => 'nullable|string',
-            'trangthai' => 'nullable|string',
+            'id_benhan'  => 'required|exists:benhan,id_benhan',
+            'trieuchung' => 'required|string',
+            'ngaykham'   => 'required|date',
+            'chandoan'   => 'required|string',
+            'trangthai'  => 'required|string',
         ]);
+
+        // Kiểm tra bệnh án có thuộc khoa của bác sĩ không
+        $benhan = \App\Models\Benhan::findOrFail($validated['id_benhan']);
+        if ($benhan->id_khoa !== $user->nhanvien->id_khoa) {
+            return response()->json(['message' => 'Bệnh án không thuộc khoa của bạn'], 403);
+        }
 
         $ttkb = ThongTinKhamBenh::create($validated);
 
@@ -41,32 +60,58 @@ class ThongTinKhamBenhController extends Controller
         return response()->json($ttkb, 201);
     }
 
+    /**
+     * 📌 Xem chi tiết thông tin khám bệnh
+     */
     public function show($id)
     {
-        $ttkb = ThongTinKhamBenh::with(['chidinh', 'toathuoc', 'hoadon'])->findOrFail($id);
-        $user = Auth::user();
+        $ttkb = ThongTinKhamBenh::with(['benhan', 'chidinh', 'toathuoc', 'hoadon'])->findOrFail($id);
+        $user = Auth::user()->load('nhanvien');
 
-        if (!in_array($user->chucvu, ['bacsi', 'dieuduong', 'khachhang'])) {
+        if ($user->loai_taikhoan === 'khachhang') {
+            $khachhang = $user->nguoidung;
+
+            if (!$khachhang) {
+                return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
+            }
+
+            if (!$ttkb->benhan || !$ttkb->benhan->hosobenhan || 
+                $ttkb->benhan->hosobenhan->id_khachhang !== $khachhang->id_khachhang) {
+                return response()->json(['message' => 'Không được phép xem TT khám bệnh này'], 403);
+            }
+        } elseif (in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
+            if ($ttkb->benhan->id_khoa !== $user->nhanvien->id_khoa) {
+                return response()->json(['message' => 'Không được phép xem TT khám bệnh khoa khác'], 403);
+            }
+        } else {
             return response()->json(['message' => 'Không có quyền truy cập'], 403);
         }
 
         return response()->json($ttkb);
     }
 
+    /**
+     * 📌 Cập nhật thông tin khám bệnh (bác sĩ & điều dưỡng)
+     */
     public function update(Request $request, $id)
     {
-        $user = Auth::user();
-        if ($user->chucvu !== 'bacsi') {
-            return response()->json(['message' => 'Chỉ bác sĩ được cập nhật'], 403);
+        $user = Auth::user()->load('nhanvien');
+
+        if (!in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
+            return response()->json(['message' => 'Không có quyền cập nhật'], 403);
         }
 
-        $ttkb = ThongTinKhamBenh::findOrFail($id);
+        $ttkb = ThongTinKhamBenh::with('benhan')->findOrFail($id);
+
+        if ($ttkb->benhan->id_khoa !== $user->nhanvien->id_khoa) {
+            return response()->json(['message' => 'Không được chỉnh TT khám bệnh khoa khác'], 403);
+        }
 
         $request->validate([
-            'trieuchung' => 'nullable|string',
-            'ngaykham' => 'nullable|date',
-            'chandoan' => 'nullable|string',
-            'trangthai' => 'nullable|string',
+            'trieuchung' => 'required|string',
+            'ngaykham'   => 'required|date',
+            'chandoan'   => 'required|string',
+            'trangthai'  => 'required|string',
         ]);
 
         $ttkb->update($request->only(['trieuchung', 'ngaykham', 'chandoan', 'trangthai']));
@@ -76,18 +121,31 @@ class ThongTinKhamBenhController extends Controller
         return response()->json($ttkb);
     }
 
-    // public function destroy($id)
-    // {
-    //     $user = Auth::user();
-    //     if ($user->chucvu !== 'bacsi') {
-    //         return response()->json(['message' => 'Chỉ bác sĩ được phép xoá'], 403);
-    //     }
+    /**
+     * ❌ Không hỗ trợ xoá
+     */
+    public function destroy($id)
+    {
+        return response()->json(['message' => 'Không hỗ trợ xoá thông tin khám bệnh'], 405);
+    }
+    public function thongTinKhamBenhCuaToi()
+{
+    $user = Auth::user();
 
-    //     $ttkb = ThongTinKhamBenh::findOrFail($id);
-    //     $ttkb->delete();
+    if ($user->loai_taikhoan !== 'khachhang') {
+        return response()->json(['message' => 'Không có quyền'], 403);
+    }
 
-    //     LogService::log('Xoá thông tin khám bệnh ID: ' . $id, 'thongtinkhambenh');
+    $khachhang = $user->nguoidung;
+    if (!$khachhang) {
+        return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
+    }
 
-    //     return response()->json(['message' => 'Đã xoá thông tin khám bệnh']);
-    // }
+    $ttkb = ThongTinKhamBenh::whereHas('benhan.hosobenhan', function ($q) use ($khachhang) {
+        $q->where('id_khachhang', $khachhang->id_khachhang);
+    })->with(['benhan'])->get();
+
+    return response()->json($ttkb);
+}
+
 }
