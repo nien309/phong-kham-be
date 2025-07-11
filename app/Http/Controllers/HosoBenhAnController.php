@@ -19,6 +19,29 @@ class HosoBenhAnController extends Controller
 
         return HosoBenhAn::with('khachhang')->get();
     }
+    public function hosoBenhAnCuaToi()
+{
+    $user = Auth::user();
+    if ($user->loai_taikhoan !== 'khachhang') {
+        return response()->json(['message' => 'Không có quyền truy cập'], 403);
+    }
+
+    $khachhang = \App\Models\KhachHang::find($user->id_nguoidung);
+    if (!$khachhang) {
+        return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
+    }
+
+    $hoso = HosoBenhAn::with('benhans', 'khachhang')
+                ->where('id_khachhang', $khachhang->id_khachhang)
+                ->get();
+
+    if ($hoso->isEmpty()) {
+        return response()->json(['message' => 'Bạn chưa có hồ sơ bệnh án'], 404);
+    }
+
+    return response()->json($hoso);
+}
+
 
     // 🧿 Tạo hồ sơ bệnh án (chỉ lễ tân)
     public function store(Request $request)

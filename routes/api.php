@@ -37,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update', [AuthController::class, 'update']);
     Route::get('/user', fn(Request $request) => $request->user());
     Route::apiResource('lich-dang-ky', LichDangKyLamViecController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::get('/hoso-benh-an-cua-toi', [HosoBenhAnController::class, 'hosoBenhAnCuaToi']);
+
     Route::apiResource('hosobenhan', HosoBenhAnController::class);
     Route::apiResource('benhan', BenhanController::class)->except(['destroy']);
     Route::apiResource('thongtinkhambenh', ThongTinKhamBenhController::class);
