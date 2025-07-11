@@ -99,5 +99,35 @@ public function update(Request $request)
 
     return response()->json(['message' => 'Cập nhật thành công']);
 }
+public function getUserInfo(Request $request)
+    {
+        try {
+            // Get the authenticated user
+            $user = $request->user();
 
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not authenticated'
+                ], 401);
+            }
+
+            // Return user information
+            return response()->json([
+                'id_taikhoan' => $user->id_taikhoan,
+                'hoten' => $user->hoten,
+                'ngaysinh' => $user->ngaysinh,
+                'gioitinh' => $user->gioitinh,
+                'sdt' => $user->sdt,
+                'email' => $user->email,
+
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -26,6 +26,36 @@ class LichHenController extends Controller
     }
 
 
+    public function lichHenCuaToi()
+{
+    /** @var TaiKhoan $user */
+    $user = auth()->user();
+
+    // Kiểm tra loại tài khoản
+    if ($user->loai_taikhoan !== 'khachhang') {
+        return response()->json(['error' => 'Tài khoản không phải khách hàng'], 403);
+    }
+
+    // Lấy khách hàng
+    $khachhang = $user->nguoidung;
+
+    if (!$khachhang) {
+        return response()->json(['error' => 'Chưa liên kết khách hàng'], 400);
+    }
+
+    // Trả về lịch hẹn của chính khách hàng này
+    $lichHen = LichHen::with([
+        'khachhang.taikhoan:id_taikhoan,id_nguoidung,hoten',
+        'nhanvien.taikhoan:id_taikhoan,id_nguoidung,hoten',
+        'cakham:id_cakham,khunggio'
+    ])
+    ->where('id_khachhang', $khachhang->id_khachhang)
+    ->orderBy('ngayhen', 'desc')
+    ->get();
+
+    return response()->json($lichHen);
+}
+
     public function show($id)
     {
         return LichHen::with([

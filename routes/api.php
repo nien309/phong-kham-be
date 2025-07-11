@@ -31,6 +31,7 @@ Route::get('khoa/{id_khoa}/bac-si-lich-ranh', [LichHenController::class, 'layBac
 
 // ✨ AUTHENTICATED ROUTES
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/taikhoan/me', [AuthController::class, 'getUserInfo']);
     Route::get('/admin/taikhoan/{id}', [AdminTaiKhoanController::class, 'show']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/update', [AuthController::class, 'update']);
@@ -42,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('chidinh', [ChiDinhController::class, 'store']);
     Route::put('chidinh/{id}', [ChiDinhController::class, 'update']);
     Route::get('chidinh/{id}', [ChiDinhController::class, 'show']);
+    Route::get('/lich-hen-cua-toi', [LichHenController::class, 'lichHenCuaToi']);
 
     Route::post('toathuoc', [ToaThuocController::class, 'store']);
     Route::put('toathuoc/{id}', [ToaThuocController::class, 'update']);
