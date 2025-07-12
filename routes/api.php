@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminTaiKhoanController;
 use App\Http\Controllers\HosoBenhAnController;
 use App\Http\Controllers\BenhAnController;
 use App\Http\Controllers\ThongtinkhambenhController;
+use App\Http\Controllers\ChiDinhController;
 use App\Http\Controllers\ToaThuocController;
 use App\Http\Controllers\HoaDonController;
 
@@ -40,13 +41,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/hoso-benh-an-cua-toi', [HosoBenhAnController::class, 'hosoBenhAnCuaToi']);
     Route::get('/benh-an-cua-toi', [BenhanController::class, 'benhanCuaToi']);
     Route::get('/thong-tin-kham-benh/cua-toi', [ThongTinKhamBenhController::class, 'thongTinKhamBenhCuaToi']);
+    Route::get('/chidinh/cua-toi', [ChiDinhController::class, 'chidinhCuaToi']);
 
     Route::apiResource('hosobenhan', HosoBenhAnController::class);
     Route::apiResource('benhan', BenhanController::class)->except(['destroy']);
     Route::apiResource('thongtinkhambenh', ThongTinKhamBenhController::class);
-    Route::post('chidinh', [ChiDinhController::class, 'store']);
-    Route::put('chidinh/{id}', [ChiDinhController::class, 'update']);
-    Route::get('chidinh/{id}', [ChiDinhController::class, 'show']);
+    Route::apiResource('chidinh', ChiDinhController::class)->only(['index', 'store', 'show', 'update']);
+
+    // Route::post('chidinh', [ChiDinhController::class, 'store']);
+    // Route::put('chidinh/{id}', [ChiDinhController::class, 'update']);
+    // Route::get('chidinh/{id}', [ChiDinhController::class, 'show']);
     Route::get('/lich-hen-cua-toi', [LichHenController::class, 'lichHenCuaToi']);
 
     Route::post('toathuoc', [ToaThuocController::class, 'store']);

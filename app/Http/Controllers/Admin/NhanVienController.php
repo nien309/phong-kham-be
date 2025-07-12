@@ -109,41 +109,28 @@ class NhanVienController extends Controller
 
         return response()->json(['message' => 'Đã xoá nhân viên và tài khoản liên quan']);
     }
-    public function getByKhoa($id_khoa)
+        public function getByKhoa($id_khoa)
 {
     $bacsi = \App\Models\NhanVien::where('id_khoa', $id_khoa)
         ->where('chucvu', 'bacsi')
-        ->with(['taikhoan:id_taikhoan,id_nguoidung,hoten'])
-        ->get(['id_nhanvien', 'id_khoa']); // không select 'hoten' ở đây
+        ->with([
+            'taikhoan:id_taikhoan,id_nguoidung,hoten',
+            'khoa:id_khoa,tenkhoa'
+        ])
+        ->get(['id_nhanvien', 'id_khoa']);
+
+    $bacsi = $bacsi->map(function ($item) {
+        return [
+            'id_nhanvien' => $item->id_nhanvien,
+            'id_khoa' => $item->id_khoa,
+            'tenkhoa' => $item->khoa->tenkhoa ?? null,
+            'taikhoan' => $item->taikhoan
+        ];
+    });
 
     return response()->json($bacsi);
 }
-public function search(Request $request)
-{
-    $request->validate([
-        'hoten' => 'nullable|string',
-        'sdt'   => 'nullable|string',
-    ]);
 
-    if (!$request->sdt && !$request->hoten) {
-        return response()->json(['message' => 'Phải nhập ít nhất số điện thoại hoặc tên'], 422);
-    }
-
-    $nhanviens = \App\Models\NhanVien::whereHas('taikhoan', function($q) use ($request) {
-        if ($request->sdt) {
-            $q->where('sdt', $request->sdt);
-        }
-        if ($request->hoten) {
-            $q->where('hoten', 'ilike', '%' . $request->hoten . '%'); // hoặc 'like' nếu dùng MySQL
-        }
-    })->with('taikhoan')->get();
-
-    if ($nhanviens->isEmpty()) {
-        return response()->json(['message' => 'Không tìm thấy nhân viên'], 404);
-    }
-
-    return response()->json($nhanviens);
-}
 
 
 

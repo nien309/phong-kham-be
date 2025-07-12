@@ -18,6 +18,8 @@ class ChiDinh extends Model
         'soluong',
         'ketqua',
         'ngaychidinh',
+        'trangthai',
+        'ngaythuchien',
         'hinhanh',
     ];
 
