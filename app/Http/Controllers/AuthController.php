@@ -117,6 +117,9 @@ public function getUserInfo(Request $request)
             'gioitinh' => $user->gioitinh,
             'sdt' => $user->sdt,
             'email' => $user->email,
+            'loai_taikhoan' =>$user->loai_taikhoan,
+            'phan_quyen'=>$user->phan_quyen,
+            'trangthai'=>$user->trangthai,
         ];
 
         // Nếu có quan hệ nhân viên thì lấy cột chucvu trực tiếp

@@ -18,7 +18,7 @@ class CreateChidinhTable extends Migration
         $table->unsignedBigInteger('id_thongtinkhambenh');
         $table->unsignedBigInteger('id_dichvu');
         $table->integer('soluong')->default(1);
-        $table->decimal('dongia', 10, 2);
+        
         $table->text('ketqua')->nullable();
         $table->text('hinhanh')->nullable();
         $table->dateTime('ngaychidinh')->nullable();

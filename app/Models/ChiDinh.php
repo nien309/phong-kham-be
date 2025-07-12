@@ -16,7 +16,6 @@ class ChiDinh extends Model
         'id_thongtinkhambenh',
         'id_dichvu',
         'soluong',
-        'dongia',
         'ketqua',
         'ngaychidinh',
         'hinhanh',
