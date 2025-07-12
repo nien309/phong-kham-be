@@ -9,9 +9,10 @@ use App\Services\LogService;
 
 class DichVuController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return DichVu::with('khoa')->get();
+        $perPage = $request->query('per_page', 10); // Số bản ghi mỗi trang, mặc định 10
+        return DichVu::with('khoa')->paginate($perPage);
     }
 
     public function store(Request $request)
