@@ -100,34 +100,42 @@ public function update(Request $request)
     return response()->json(['message' => 'Cập nhật thành công']);
 }
 public function getUserInfo(Request $request)
-    {
-        try {
-            // Get the authenticated user
-            $user = $request->user();
+{
+    try {
+        $user = $request->user();
 
-            if (!$user) {
-                return response()->json([
-                    'message' => 'User not authenticated'
-                ], 401);
-            }
-
-            // Return user information
+        if (!$user) {
             return response()->json([
-                'id_taikhoan' => $user->id_taikhoan,
-                'hoten' => $user->hoten,
-                'ngaysinh' => $user->ngaysinh,
-                'gioitinh' => $user->gioitinh,
-                'sdt' => $user->sdt,
-                'email' => $user->email,
-
-            ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'User not authenticated'
+            ], 401);
         }
+
+        $data = [
+            'id_taikhoan' => $user->id_taikhoan,
+            'hoten' => $user->hoten,
+            'ngaysinh' => $user->ngaysinh,
+            'gioitinh' => $user->gioitinh,
+            'sdt' => $user->sdt,
+            'email' => $user->email,
+        ];
+
+        // Nếu có quan hệ nhân viên thì lấy cột chucvu trực tiếp
+        if ($user->nhanvien) {
+            $data['nhanvien'] = [
+                'id_nhanvien' => $user->nhanvien->id_nhanvien,
+                'chucvu' => $user->nhanvien->chucvu, // đây là cột, không phải quan hệ
+            ];
+        }
+
+        return response()->json($data, 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Something went wrong',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 }
