@@ -160,7 +160,7 @@ public function searchByPhone(Request $request)
         return response()->json(['message' => 'Khách hàng này chưa có hồ sơ bệnh án'], 404);
     }
 
-    return response()->json($hoso);
+    return response()->json($hoso[0]);
 }
 
 
