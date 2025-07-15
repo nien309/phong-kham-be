@@ -134,7 +134,6 @@ public function searchByPhone(Request $request)
 {
     $user = Auth::user()->load('nhanvien');
 
-    // 👉 Chỉ cho bác sĩ hoặc lễ tân tìm kiếm
     $chucvu = $user->nhanvien->chucvu ?? null;
     if (!in_array($chucvu, ['bacsi', 'letan'])) {
         return response()->json(['message' => 'Không có quyền tìm kiếm hồ sơ'], 403);
@@ -144,17 +143,16 @@ public function searchByPhone(Request $request)
         'sdt' => 'required|string',
     ]);
 
-    // Vì sdt nằm ở bảng taikhoans nên phải whereHas
     $khachhang = \App\Models\KhachHang::whereHas('taikhoan', function($query) use ($request) {
         $query->where('sdt', $request->sdt);
-    })->with('taikhoan')->first();
+    })->first();
 
     if (!$khachhang) {
         return response()->json(['message' => 'Không tìm thấy khách hàng với số điện thoại này'], 404);
     }
 
-    // Tìm tất cả hồ sơ bệnh án của khách hàng này
-    $hoso = HosoBenhAn::with('benhans', 'khachhang')
+    // Chú ý: with('khachhang.taikhoan')
+    $hoso = HosoBenhAn::with(['benhans', 'khachhang.taikhoan'])
                 ->where('id_khachhang', $khachhang->id_khachhang)
                 ->get();
 
@@ -164,6 +162,7 @@ public function searchByPhone(Request $request)
 
     return response()->json($hoso);
 }
+
 
 }
 
