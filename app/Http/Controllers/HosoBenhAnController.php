@@ -6,6 +6,7 @@ use App\Models\HosoBenhAn;
 use App\Models\Taikhoan;
 use App\Models\KhachHang;
 
+
 use Illuminate\Http\Request;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Auth;
@@ -152,7 +153,9 @@ public function searchByPhone(Request $request)
     }
 
     // Chú ý: with('khachhang.taikhoan')
-    $hoso = HosoBenhAn::with(['benhans', 'khachhang.taikhoan'])
+    $hoso = HosoBenhAn::with(['benhans', 'khachhang.taikhoan',    'benhans.khoa',
+    'benhans.nhanvien.taikhoan'
+])
                 ->where('id_khachhang', $khachhang->id_khachhang)
                 ->get();
 
