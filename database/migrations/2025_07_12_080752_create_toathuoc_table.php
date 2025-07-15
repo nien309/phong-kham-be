@@ -17,8 +17,8 @@ class CreateToathuocTable extends Migration
         $table->id('id_toathuoc');
         $table->unsignedBigInteger('id_thongtinkhambenh');
         $table->text('chandoan')->nullable();
-        $table->date('ngayketoa')->nullable();
-        $table->string('trangthai')->default('moi');
+        $table->timestamp('ngayketoa')->useCurrent();
+        
         $table->timestamps();
         $table->softDeletes();
 

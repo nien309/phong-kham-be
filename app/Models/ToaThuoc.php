@@ -16,11 +16,16 @@ class ToaThuoc extends Model
         'id_thongtinkhambenh',
         'chandoan',
         'ngayketoa',
-        'trangthai',
+        
     ];
 
     public function thongtinkhambenh()
     {
         return $this->belongsTo(ThongTinKhamBenh::class, 'id_thongtinkhambenh');
     }
+    public function chiTietToaThuoc()
+    {
+        return $this->hasMany(ChiTietToaThuoc::class, 'id_toathuoc', 'id_toathuoc');
+    }
+
 }

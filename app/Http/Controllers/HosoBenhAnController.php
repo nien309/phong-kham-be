@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\HosoBenhAn;
+use App\Models\Taikhoan;
+use App\Models\KhachHang;
+
 use Illuminate\Http\Request;
 use App\Services\LogService;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +47,7 @@ class HosoBenhAnController extends Controller
 
 
     // 🧿 Tạo hồ sơ bệnh án (chỉ lễ tân)
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $user = Auth::user()->load('nhanvien');
         if ($user->nhanvien->chucvu !== 'letan') {
@@ -52,17 +55,49 @@ class HosoBenhAnController extends Controller
         }
 
         $validated = $request->validate([
-            'id_khachhang' => 'required',
+            'sdt' => 'required',
         ]);
 
-        $hoso = HosoBenhAn::create([
-            'id_khachhang' => $validated['id_khachhang'],
+        // Tìm tài khoản theo SĐT
+        $taikhoan = \App\Models\TaiKhoan::where('sdt', $validated['sdt'])->first();
+
+        if (!$taikhoan) {
+            return response()->json([
+                'message' => 'Không tìm thấy tài khoản. Vui lòng tạo tài khoản trước.'
+            ], 404);
+        }
+
+        // Lấy khách hàng
+        $khachhang = \App\Models\KhachHang::where('id_khachhang', $taikhoan->id_nguoidung)->first();
+
+        if (!$khachhang) {
+            return response()->json([
+                'message' => 'Không tìm thấy thông tin khách hàng. Vui lòng kiểm tra lại.'
+            ], 404);
+        }
+
+        // Kiểm tra hồ sơ đã tồn tại chưa
+        $hosobenhan = \App\Models\HosoBenhAn::where('id_khachhang', $khachhang->id_khachhang)->first();
+
+        if ($hosobenhan) {
+            return response()->json([
+                'message' => 'Khách hàng đã có hồ sơ bệnh án.',
+                'data' => $hosobenhan
+            ], 409);
+        }
+
+        // Tạo mới hồ sơ
+        $hosobenhan = \App\Models\HosoBenhAn::create([
+            'id_khachhang' => $khachhang->id_khachhang,
         ]);
 
-        // LogService::log('Tạo hồ sơ bệnh án ID: ' . $hoso->id_hosobenhan, 'hosobenhan');
-
-        return response()->json($hoso, 201);
+        return response()->json([
+            'message' => 'Tạo hồ sơ bệnh án thành công',
+            'data' => $hosobenhan
+        ], 201);
     }
+
+
 
     // 🧿 Xem 1 hồ sơ (chỉ bác sĩ/khách hàng xem hồ sơ của mình)
     public function show($id)

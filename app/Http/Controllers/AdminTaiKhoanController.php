@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Services\LogService;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class AdminTaiKhoanController extends Controller
@@ -50,6 +50,49 @@ class AdminTaiKhoanController extends Controller
         'taikhoan' => $taikhoan,
     ]);
 }
+public function createFromLetan(Request $request)
+{
+    $user = Auth::user()->load('nhanvien');
+    if ($user->nhanvien->chucvu !== 'letan') {
+        return response()->json(['message' => 'Chỉ lễ tân được phép tạo tài khoản khách hàng.'], 403);
+    }
+
+    $validated = $request->validate([
+        'hoten' => 'required|string',
+        'matkhau' => 'required|string|min:6|confirmed',
+        'sdt' => 'required|unique:taikhoan,sdt',
+        'email' => 'nullable|email|unique:taikhoan,email',
+        'gioitinh' => 'nullable|string',
+        'ngaysinh' => 'nullable|date',
+        'diachi' => 'nullable|string',
+    ]);
+
+    // Tạo khách hàng trước
+    $nguoidung = \App\Models\KhachHang::create([
+        'nghenghiep' => $request->nghenghiep ?? '',
+    ]);
+
+    $taikhoan = \App\Models\TaiKhoan::create([
+        'hoten' => $validated['hoten'],
+        'matkhau' => bcrypt($validated['matkhau']),
+        'sdt' => $validated['sdt'],
+        'email' => $validated['email'],
+        'gioitinh' => $request->gioitinh ?? 'khac',
+        'ngaysinh' => $request->ngaysinh ?? now(),
+        'diachi' => $request->diachi ?? '',
+        'loai_taikhoan' => 'khachhang',
+        'phan_quyen' => 'khachhang',
+        'id_nguoidung' => $nguoidung->getKey(),
+    ]);
+
+    LogService::log('Lễ tân tạo tài khoản KH: ' . $taikhoan->hoten, 'taikhoan');
+
+    return response()->json([
+        'message' => 'Tạo tài khoản khách hàng thành công',
+        'taikhoan' => $taikhoan,
+    ]);
+}
+
     public function index()
     {
         $taikhoans = \App\Models\TaiKhoan::all()->sortBy('id_taikhoan')->values();
