@@ -100,7 +100,7 @@ class BenhanController extends Controller
      */
     public function show($id)
 {
-    $benhan = Benhan::with(['hosobenhan', 'thongtinkhambenh', 'khoa', 'nhanvien'])
+    $benhan = Benhan::with(['hosobenhan', 'thongtinkhambenh', 'khoa', 'nhanvien.taikhoan'])
         ->findOrFail($id);
 
     $user = Auth::user()->load('nhanvien');
