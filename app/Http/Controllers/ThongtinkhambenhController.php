@@ -109,12 +109,11 @@ class ThongTinKhamBenhController extends Controller
 
         $request->validate([
             'trieuchung' => 'required|string',
-            'ngaykham'   => 'required|date',
             'chandoan'   => 'required|string',
             'trangthai'  => 'required|string',
         ]);
 
-        $ttkb->update($request->only(['trieuchung', 'ngaykham', 'chandoan', 'trangthai']));
+        $ttkb->update($request->only(['trieuchung', 'chandoan', 'trangthai']));
 
         LogService::log('Cập nhật thông tin khám bệnh ID: ' . $id, 'thongtinkhambenh');
 
