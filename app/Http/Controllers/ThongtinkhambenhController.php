@@ -65,7 +65,7 @@ class ThongTinKhamBenhController extends Controller
      */
     public function show($id)
     {
-        $ttkb = ThongTinKhamBenh::with(['benhan', 'chidinh', 'toathuoc', 'hoadon'])->findOrFail($id);
+        $ttkb = ThongTinKhamBenh::with([ 'chidinh', 'toathuoc', 'hoadon'])->findOrFail($id);
         $user = Auth::user()->load('nhanvien');
 
         if ($user->loai_taikhoan === 'khachhang') {
@@ -147,5 +147,30 @@ class ThongTinKhamBenhController extends Controller
 
     return response()->json($ttkb);
 }
+/**
+ * 📌 Lấy danh sách Thông Tin Khám Bệnh theo ID Bệnh Án
+ */
+public function getByBenhan($id_benhan)
+{
+    $user = Auth::user()->load('nhanvien');
+
+    // Chỉ bác sĩ, điều dưỡng được phép xem
+    if (!in_array($user->nhanvien->chucvu ?? null, ['bacsi', 'dieuduong'])) {
+        return response()->json(['message' => 'Không có quyền truy cập'], 403);
+    }
+
+    // Tìm bệnh án và kiểm tra khoa
+    $benhan = \App\Models\Benhan::findOrFail($id_benhan);
+    if ($benhan->id_khoa !== $user->nhanvien->id_khoa) {
+        return response()->json(['message' => 'Không được phép xem bệnh án khoa khác'], 403);
+    }
+
+    $ttkb = ThongTinKhamBenh::where('id_benhan', $id_benhan)
+        ->with([ 'chidinh', 'toathuoc', 'hoadon'])
+        ->get();
+
+    return response()->json($ttkb);
+}
+
 
 }

@@ -42,7 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('lich-dang-ky', LichDangKyLamViecController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::get('/hoso-benh-an-cua-toi', [HosoBenhAnController::class, 'hosoBenhAnCuaToi']);
     Route::get('/benh-an-cua-toi', [BenhanController::class, 'benhanCuaToi']);
-    Route::get('/thong-tin-kham-benh/cua-toi', [ThongTinKhamBenhController::class, 'thongTinKhamBenhCuaToi']);
+    Route::get('/thongtinkhambenh/cua-toi', [ThongTinKhamBenhController::class, 'thongTinKhamBenhCuaToi']);
+    Route::get('/thongtinkhambenh/benhan/{id_benhan}', [ThongTinKhamBenhController::class, 'getByBenhan']);
+
     Route::get('/chidinh/cua-toi', [ChiDinhController::class, 'chidinhCuaToi']);
 
     Route::apiResource('hosobenhan', HosoBenhAnController::class);
