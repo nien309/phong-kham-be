@@ -65,7 +65,7 @@ class ThongTinKhamBenhController extends Controller
      */
     public function show($id)
     {
-        $ttkb = ThongTinKhamBenh::with([ 'chidinh.dichvu', 'toathuoc', 'hoadon'])->findOrFail($id);
+        $ttkb = ThongTinKhamBenh::with([ 'chidinh.dichvu', 'toathuoc.chitiettoathuoc', 'hoadon'])->findOrFail($id);
         $user = Auth::user()->load('nhanvien');
 
         if ($user->loai_taikhoan === 'khachhang') {
