@@ -64,7 +64,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('hoadon/{id}/export', [HoaDonController::class, 'exportPdf']);
     Route::post('/hosobenhan/search-by-phone', [HosoBenhAnController::class, 'searchByPhone']);
 
+    Route::get('khach-hang/{id}/lich-su-kham-hoan-thanh-chua-co-hoadon', [KhachHangController::class, 'lichSuKhamHoanThanhChuaCoHoaDon']);
 
+    Route::get('thong-tin-kham-benh/{id}/chi-tiet', [ThongTinKhamBenhController::class, 'chiTiet']);
 
     // 🟩 KHÁCH HÀNG ĐẶT LỊCH
    Route::post('/lichhen', [LichHenController::class, 'datLich']);

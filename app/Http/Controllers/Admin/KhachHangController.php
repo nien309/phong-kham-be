@@ -167,6 +167,32 @@ class KhachHangController extends Controller
 
     return response()->json($khachhangs);
 }
+public function lichSuKhamHoanThanhChuaCoHoaDon($id)
+{
+    $khachhang = \App\Models\KhachHang::findOrFail($id);
 
+    $hosobenhan = $khachhang->hosobenhan()->with('benhans.nhanvien.taikhoan','benhans.thongtinkhambenh.hoadon')->get();
+
+    $dsKham = [];
+
+    foreach ($hosobenhan as $hsba) {
+        foreach ($hsba->benhans as $benhan) {
+            foreach ($benhan->thongtinkhambenh as $ttkb) {
+                if ($ttkb->trangthai === 'da_hoan_thanh') {
+                    $coHoaDonKhacHuy = $ttkb->hoadon()->whereNotIn('trangthai', ['huy'])->exists();
+                    if (!$coHoaDonKhacHuy) {
+                        $dsKham[] = [
+                            'id_thongtinkhambenh' => $ttkb->id_thongtinkhambenh,
+                            'ngaykham' => $ttkb->ngaykham,
+                            'bacsi' => $benhan->nhanvien->taikhoan->hoten ?? null,
+                        ];
+                    }
+                }
+            }
+        }
+    }
+
+    return response()->json($dsKham);
+}
 
 }

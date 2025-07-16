@@ -17,6 +17,10 @@ class KhachHang extends Model
         return $this->hasOne(TaiKhoan::class, 'id_nguoidung', 'id_khachhang')
                     ->where('loai_taikhoan', 'khachhang');
     }
+    public function hosobenhan()
+{
+    return $this->hasOne(HoSoBenhAn::class, 'id_khachhang', 'id_khachhang');
+}
 
 
 }

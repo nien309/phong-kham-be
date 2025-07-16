@@ -108,8 +108,7 @@ class ThongTinKhamBenhController extends Controller
         }
 
         $request->validate([
-            'trieuchung' => 'required|string',
-            'chandoan'   => 'required|string',
+           
             'trangthai'  => 'required|string',
         ]);
 
@@ -171,5 +170,23 @@ public function getByBenhan($id_benhan)
     return response()->json($ttkb);
 }
 
+public function chiTiet($id)
+    {
+        $ttkb = ThongTinKhamBenh::with(['chidinh.dichvu', 'benhan.nhanvien.taikhoan'])->findOrFail($id);
 
+        $chidinh = $ttkb->chidinh->map(function ($cd) {
+            return [
+                'tendichvu' => $cd->dichvu->tendichvu ?? null,
+                'soluong' => $cd->soluong,
+                'dongia' => $cd->dongia,
+            ];
+        });
+
+        return response()->json([
+            'id_thongtinkhambenh' => $ttkb->id_thongtinkhambenh,
+            'ngaykham' => $ttkb->ngaykham,
+            'bacsi' => $ttkb->benhan->nhanvien->taikhoan->hoten ?? null,
+            'chidinh' => $chidinh,
+        ]);
+    }
 }

@@ -12,10 +12,17 @@ use PDF;
 class HoaDonController extends Controller
 {
     /**
-     * TẠO HOÁ ĐƠN (Thu ngân)
+     * TẠO HOÁ ĐƠN (Chỉ lễ tân/thu ngân)
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+        // 👉 RÀNG BUỘC: Chỉ nhân viên có chức vụ lễ tân/thu ngân
+        if (!$user->nhanvien || !in_array($user->nhanvien->chucvu, ['letan', 'thungan'])) {
+            return response()->json(['message' => 'Bạn không có quyền tạo hoá đơn!'], 403);
+        }
+
         $request->validate([
             'id_thongtinkhambenh' => 'required|exists:thongtinkhambenh,id_thongtinkhambenh',
             'hinhthucthanhtoan' => 'in:tien_mat,chuyen_khoan,vi_dien_tu',
@@ -29,14 +36,12 @@ class HoaDonController extends Controller
         }
 
         // Tính tổng tiền
-        $tongtien = $chidinh->sum(function ($item) {
-            return $item->soluong * $item->dongia;
-        });
+        $tongtien = $chidinh->sum(fn($item) => $item->soluong * $item->dongia);
 
         // Tạo hoá đơn
         $hoadon = HoaDon::create([
             'id_thongtinkhambenh' => $request->id_thongtinkhambenh,
-            'id_taikhoan' => Auth::user()->id_taikhoan,
+            'id_taikhoan' => $user->id_taikhoan,
             'tongtien' => $tongtien,
             'ngaytao' => now(),
             'hinhthucthanhtoan' => $request->hinhthucthanhtoan ?? 'tien_mat',
@@ -51,6 +56,7 @@ class HoaDonController extends Controller
 
     /**
      * TÌM KIẾM DANH SÁCH HOÁ ĐƠN (Lễ tân, KH, quản lý)
+     * Cho khách xem thì không cần chặn, còn muốn chặn thì có thể check riêng.
      */
     public function index(Request $request)
     {
@@ -74,20 +80,24 @@ class HoaDonController extends Controller
     }
 
     /**
-     * XEM CHI TIẾT HOÁ ĐƠN
+     * XEM CHI TIẾT HOÁ ĐƠN (ai cũng xem được)
      */
     public function show($id)
     {
         $hoadon = HoaDon::with(['thongtinkhambenh.chidinh.dichvu'])->findOrFail($id);
-
         return response()->json($hoadon);
     }
 
     /**
-     * HUỶ HOÁ ĐƠN (phải nhập lý do)
+     * HUỶ HOÁ ĐƠN (chỉ lễ tân/thu ngân)
      */
     public function destroy(Request $request, $id)
     {
+        $user = Auth::user();
+        if (!$user->nhanvien || !in_array($user->nhanvien->chucvu, ['letan', 'thungan'])) {
+            return response()->json(['message' => 'Bạn không có quyền huỷ hoá đơn!'], 403);
+        }
+
         $request->validate([
             'lydo' => 'required|string|max:255',
         ]);
@@ -106,7 +116,7 @@ class HoaDonController extends Controller
     }
 
     /**
-     * XUẤT PDF
+     * XUẤT PDF (không ràng buộc, tuỳ quyền)
      */
     public function exportPdf($id)
     {
