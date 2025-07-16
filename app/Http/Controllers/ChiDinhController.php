@@ -66,6 +66,8 @@ class ChiDinhController extends Controller
             'id_thongtinkhambenh' => 'required|exists:thongtinkhambenh,id_thongtinkhambenh',
             'id_dichvu'           => 'required|exists:dich_vus,id_dichvu',
             'soluong'             => 'required|integer|min:1',
+            'dongia'             => 'required|numeric|min:1',
+
         ]);
 
         // Kiểm tra ThongTinKhamBenh có thuộc khoa của bác sĩ không
