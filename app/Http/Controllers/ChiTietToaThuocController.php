@@ -80,39 +80,32 @@ class ChiTietToaThuocController extends Controller
     }
 
     // ✏️ Sửa chi tiết toa thuốc (BÁC SĨ)
-  public function update(Request $request, $id) // Bỏ model binding
+  public function update(Request $request, $id)
 {
-    // 1. Tìm thủ công với eager loading
+    // 1. Tìm chi tiết toa thuốc kèm quan hệ
     $chiTiet = ChiTietToaThuoc::with([
-            'toaThuoc:id_toathuoc,id_thongtinkhambenh', 
-            'toaThuoc.thongtinkhambenh:id_thongtinkhambenh,id_benhan',
-            'toaThuoc.thongtinkhambenh.benhan:id_benhan,id_khoa'
-        ])
-        ->findOrFail($id);
+        'toaThuoc:id_toathuoc,id_thongtinkhambenh',
+        'toaThuoc.thongtinkhambenh:id_thongtinkhambenh,id_benhan',
+        'toaThuoc.thongtinkhambenh.benhan:id_benhan,id_khoa'
+    ])->findOrFail($id);
 
-    // 2. Debug quan hệ
-    if (!$chiTiet->toaThuoc) {
-        logger()->error('Lỗi quan hệ toa thuốc', [
-            'expected_toa_id' => $chiTiet->id_toathuoc,
-            'actual_toa' => ToaThuoc::find($chiTiet->id_toathuoc)?->toArray()
-        ]);
-        
-        abort(500, 'Dữ liệu quan hệ không khớp');
-    }
+    // 2. Lấy user + thông tin nhân viên
+    $user = Auth::user()->load('nhanvien:id_nhanvien,chucvu,id_khoa');
 
-    // 3. Kiểm tra quyền
-    $user = Auth::user()->load('nhanvien:id,chucvu,id_khoa');
-    
+    // 3. Chỉ cho phép bác sĩ
     if ($user->nhanvien->chucvu !== 'bacsi') {
-        return response()->json(['message' => 'Chỉ bác sĩ được cập nhật'], 403);
+        return response()->json(['message' => 'Chỉ bác sĩ được phép cập nhật'], 403);
     }
 
     // 4. Kiểm tra khoa
-    if ($chiTiet->toaThuoc->thongtinkhambenh->benhan->id_khoa !== $user->nhanvien->id_khoa) {
-        return response()->json(['message' => 'Không được phép cập nhật chi tiết toa thuốc khoa khác'], 403);
+    $idKhoaBenhAn = $chiTiet->toaThuoc->thongtinkhambenh->benhan->id_khoa ?? null;
+    $idKhoaNhanVien = $user->nhanvien->id_khoa ?? null;
+
+    if ($idKhoaBenhAn !== $idKhoaNhanVien) {
+        return response()->json(['message' => 'Không được phép cập nhật chi tiết toa thuốc của khoa khác'], 403);
     }
 
-    // 5. Validate và update
+    // 5. Validate + Update
     $validated = $request->validate([
         'ten' => 'nullable|string|max:255',
         'so_luong' => 'nullable|integer|min:1|max:100',

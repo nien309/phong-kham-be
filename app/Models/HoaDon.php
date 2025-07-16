@@ -12,12 +12,16 @@ class HoaDon extends Model
     protected $table = 'hoadon';
     protected $primaryKey = 'id_hoadon';
 
-    protected $fillable = [
-        'id_thongtinkhambenh',
-        'ngaytao',
-        'trangthai',
-        'hinhthucthanhtoan',
+   protected $fillable = [
+    'id_thongtinkhambenh',
+    'id_taikhoan',
+    'tongtien',
+    'ngaytao',
+    'hinhthucthanhtoan',
+    'trangthai',
+    'lydo_huy',
     ];
+
 
     public function thongtinkhambenh()
     {

@@ -58,9 +58,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('chitiettoathuoc', ChiTietToaThuocController::class);
 
 
-    Route::post('hoadon', [HoaDonController::class, 'store']);
-    Route::put('hoadon/{id}', [HoaDonController::class, 'update']);
-    Route::get('hoadon/{id}', [HoaDonController::class, 'show']);
+    Route::apiResource('hoadon', HoaDonController::class)->only([
+    'index', 'store', 'show', 'destroy']);
+
+    Route::get('hoadon/{id}/export', [HoaDonController::class, 'exportPdf']);
     Route::post('/hosobenhan/search-by-phone', [HosoBenhAnController::class, 'searchByPhone']);
 
 
