@@ -21,6 +21,7 @@ class ChiDinh extends Model
         'trangthai',
         'ngaythuchien',
         'hinhanh',
+        'dongia',
     ];
 
     public function thongtinkhambenh()
