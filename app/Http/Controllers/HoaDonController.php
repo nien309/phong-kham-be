@@ -54,16 +54,14 @@ class HoaDonController extends Controller
         ], 201);
     }
 
-    /**
-     * TÌM KIẾM DANH SÁCH HOÁ ĐƠN (Lễ tân, KH, quản lý)
-     * Cho khách xem thì không cần chặn, còn muốn chặn thì có thể check riêng.
-     */
+    
+     
     public function index(Request $request)
     {
-        $query = HoaDon::with('thongtinkhambenh');
+        $query = HoaDon::with('thongtinkhambenh.benhan.hosobenhan.khachhang.taikhoan');
 
         if ($request->has('sdt')) {
-            $query->whereHas('thongtinkhambenh.hosobenhan.khachhang', function ($q) use ($request) {
+            $query->whereHas('thongtinkhambenh.hosobenhan.khachhang.taikhoan', function ($q) use ($request) {
                 $q->where('sdt', $request->sdt);
             });
         }
@@ -84,7 +82,7 @@ class HoaDonController extends Controller
      */
     public function show($id)
     {
-        $hoadon = HoaDon::with(['thongtinkhambenh.chidinh.dichvu'])->findOrFail($id);
+        $hoadon = HoaDon::with(['thongtinkhambenh.chidinh.dichvu','thongtinkhambenh.hosobenhan.khachhang.taikhoan'])->findOrFail($id);
         return response()->json($hoadon);
     }
 

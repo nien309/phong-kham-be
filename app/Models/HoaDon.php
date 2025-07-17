@@ -27,4 +27,10 @@ class HoaDon extends Model
     {
         return $this->belongsTo(ThongTinKhamBenh::class, 'id_thongtinkhambenh');
     }
+    
+    public function taikhoan()
+    {
+        return $this->belongsTo(TaiKhoan::class, 'id_taikhoan');
+    }
+
 }
