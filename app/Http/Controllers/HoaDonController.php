@@ -82,7 +82,7 @@ class HoaDonController extends Controller
      */
     public function show($id)
     {
-        $hoadon = HoaDon::with(['thongtinkhambenh.chidinh.dichvu','thongtinkhambenh.hosobenhan.khachhang.taikhoan'])->findOrFail($id);
+        $hoadon = HoaDon::with(['thongtinkhambenh.chidinh.dichvu'])->findOrFail($id);
         return response()->json($hoadon);
     }
 
