@@ -115,6 +115,26 @@ class HoaDonController extends Controller
         return response()->json(['message' => 'Đã huỷ hoá đơn thành công.']);
     }
 
+    public function update(Request $request, $id){
+        $user = Auth::user();
+        if(!$user->nhanvien || !in_array($user->nhanvien->chucvu,['thungan'])){
+            return response()->json(['message'=> 'Bạn không có quyền cập nhật trạng thái hoá đơn'],403);
+        }
+        $request ->validate([
+            'trangthai' => 'required|in:cho_thanh_toan,da_thanh_toan',
+
+        ]);
+        $hoadon= HoaDon::findOrFail($id);
+        if($hoadon->trangthai==='huy'){
+            return response()->json(['message'=>'Không thể cập nhật hoá đơn đã huỷ!'],400);
+        }
+        $hoadon->trangthai =$request->trangthai;
+        $hoadon->save();
+        return response()->json([
+            'message' => "Cập nhật trạng thái hoá đơn thành công.",
+            'hoadon' =>$hoadon,
+        ]);
+    }
     /**
      * XUẤT PDF (không ràng buộc, tuỳ quyền)
      */

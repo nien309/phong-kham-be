@@ -176,7 +176,7 @@ public function chiTiet($id)
 
         $chidinh = $ttkb->chidinh->map(function ($cd) {
             return [
-                'tendichvu' => $cd->dichvu->tendichvu ?? null,
+                'dichvu' => $cd->dichvu ?? null,
                 'soluong' => $cd->soluong,
                 'dongia' => $cd->dongia,
             ];
