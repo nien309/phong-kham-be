@@ -10,6 +10,8 @@ use App\Http\Controllers\ThongtinkhambenhController;
 use App\Http\Controllers\ChiDinhController;
 use App\Http\Controllers\ToaThuocController;
 use App\Http\Controllers\ChiTietToaThuocController;
+use App\Http\Controllers\DichVuController;
+
 
 use App\Http\Controllers\HoaDonController;
 
@@ -30,7 +32,7 @@ Route::get('/khoas/{id}', [KhoaController::class, 'show']);
 Route::get('/cakham', [CaKhamController::class, 'index']);
 Route::get('/nhanviens/khoas/{id_khoa}', [NhanVienController::class, 'getByKhoa']);
 Route::get('khoa/{id_khoa}/bac-si-lich-ranh', [LichHenController::class, 'layBacSiTheoLichRanh']);
-
+Route::get('/dichvus',[DichVuController::class,'xem']);
 
 // ✨ AUTHENTICATED ROUTES
 Route::middleware('auth:sanctum')->group(function () {
