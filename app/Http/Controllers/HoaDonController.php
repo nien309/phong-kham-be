@@ -89,30 +89,23 @@ class HoaDonController extends Controller
     /**
      * HUỶ HOÁ ĐƠN (chỉ lễ tân/thu ngân)
      */
-    public function destroy(Request $request, $id)
-    {
+    public function cancel (Request $request,$id){
         $user = Auth::user();
-        if(!$user->nhanvien || !in_array($user->nhanvien->chucvu,['thungan'])){
-            return response()->json(['message' => 'Bạn không có quyền huỷ hoá đơn!'], 403);
+        if(!$user->nhanvien || !in_array($user->nhanvien->chucvu, ['thungan'])){
+            return response()->json(['message' => 'Bạn không có quyền huỷ hoá đơn'],403);
         }
-
         $request->validate([
-            'lydo' => 'required|string|max:255',
+            'lydo'=>'required|string|max:255',
         ]);
-
-        $hoadon = HoaDon::findOrFail($id);
-
-        if ($hoadon->trangthai === 'da_thanh_toan') {
-            return response()->json(['message' => 'Không thể huỷ hoá đơn đã thanh toán.'], 400);
+        $hoadon= HoaDon::findOrFail($id);
+        if ($hoadon->trangthai === 'da_thanh_toan'){
+            return response()->json(['message'=>'Không thể huỷ hoá đơn đã thanh toán.'],400);
         }
-
-        $hoadon->trangthai = 'da_huy';
-        $hoadon->lydo_huy = $request->lydo;
+        $hoadon->trangthai='da_huy';
+        $hoadon->lydo_huy=$request->lydo;
         $hoadon->save();
-
-        return response()->json(['message' => 'Đã huỷ hoá đơn thành công.']);
+        return response()->json(['message'=>'Đã huỷ hoá đơn thành công']);
     }
-
     public function update(Request $request, $id){
         $user = Auth::user();
         if(!$user->nhanvien || !in_array($user->nhanvien->chucvu,['thungan'])){

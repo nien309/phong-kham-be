@@ -18,11 +18,29 @@ class LichLamViecController extends Controller
     }
 
     // Nếu là nhân viên → chỉ xem lịch của chính mình
-    if ($user->loai_taikhoan === 'nhanvien' && $nguoidung) {
-        return LichLamViec::with('nhanvien')
-            ->where('id_nhanvien', $nguoidung->id_nhanvien)
-            ->get();
-    }
+   if ($user->loai_taikhoan === 'nhanvien' && $nguoidung) {
+    $lich = LichLamViec::with('nhanvien')
+        ->where('id_nhanvien', $nguoidung->id_nhanvien)
+        ->get();
+
+    $thangHienTai = date('m');
+    $namHienTai = date('Y');
+
+    $lich = $lich->filter(function ($item) use ($thangHienTai, $namHienTai) {
+        $thoigian = json_decode($item->thoigianlamviec, true);
+        foreach ($thoigian as $ngayCa) {
+            $ngay = $ngayCa['ngay'];
+            $time = strtotime($ngay);
+            if (date('m', $time) == $thangHienTai && date('Y', $time) == $namHienTai) {
+                return true; // có ít nhất 1 ngày thuộc tháng hiện tại
+            }
+        }
+        return false;
+    });
+
+    return $lich->values(); // reset index
+}
+
 
     return response()->json(['error' => 'Không có quyền truy cập'], 403);
 }
