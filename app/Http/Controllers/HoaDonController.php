@@ -101,7 +101,7 @@ class HoaDonController extends Controller
         if ($hoadon->trangthai === 'da_thanh_toan'){
             return response()->json(['message'=>'Không thể huỷ hoá đơn đã thanh toán.'],400);
         }
-        $hoadon->trangthai='da_huy';
+        $hoadon->trangthai='huy';
         $hoadon->lydo_huy=$request->lydo;
         $hoadon->save();
         return response()->json(['message'=>'Đã huỷ hoá đơn thành công']);
@@ -116,7 +116,7 @@ class HoaDonController extends Controller
 
         ]);
         $hoadon= HoaDon::findOrFail($id);
-        if($hoadon->trangthai==='da_huy'){
+        if($hoadon->trangthai==='huy'){
             return response()->json(['message'=>'Không thể cập nhật hoá đơn đã huỷ!'],400);
         }
         $hoadon->trangthai =$request->trangthai;
