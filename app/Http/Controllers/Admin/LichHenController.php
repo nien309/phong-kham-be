@@ -12,6 +12,9 @@ use App\Models\NhanVien;
 use App\Models\LichLamViec;
 use App\Models\CaKham;
 use App\Models\Khoa;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LichHenMail;
+
 class LichHenController extends Controller
 {
     public function index()
@@ -67,48 +70,58 @@ class LichHenController extends Controller
 
     
     public function datLich(Request $request)
-    {
-        /** @var TaiKhoan $user */
-        $user = auth()->user(); // đăng nhập trả về từ bảng `taikhoan`
+{
+    /** @var TaiKhoan $user */
+    $user = auth()->user();
 
-        // Lấy id_khachhang từ quan hệ
-        $khachhang = $user->nguoidung;
-        if (!$khachhang || !$user->loai_taikhoan === 'khachhang') {
-            return response()->json(['error' => 'Tài khoản không phải khách hàng hoặc chưa liên kết khách hàng.'], 400);
-        }
+    $khachhang = $user->nguoidung;
+    if (!$khachhang || $user->loai_taikhoan !== 'khachhang') {
+        return response()->json(['error' => 'Tài khoản không phải khách hàng hoặc chưa liên kết khách hàng.'], 400);
+    }
 
-        $validated = $request->validate([
-            'id_nhanvien' => 'required|exists:nhan_viens,id_nhanvien',
-            'id_khoa' => 'required|exists:khoas,id_khoa',
-            'id_cakham' => 'required|exists:cakham,id_cakham',
-            'ngayhen' => 'required|date',
-            'ghichu' => 'nullable|string',
-        ]);
+    $validated = $request->validate([
+        'id_nhanvien' => 'required|exists:nhan_viens,id_nhanvien',
+        'id_khoa' => 'required|exists:khoas,id_khoa',
+        'id_cakham' => 'required|exists:cakham,id_cakham',
+        'ngayhen' => 'required|date',
+        'ghichu' => 'nullable|string',
+    ]);
 
-        $validated['id_khachhang'] = $khachhang->id_khachhang;
-        $validated['trangthai'] = 'chờ xác nhận';
+    $validated['id_khachhang'] = $khachhang->id_khachhang;
+    $validated['trangthai'] = 'chờ xác nhận';
 
-        // Kiểm tra bác sĩ đó có lịch làm việc đúng ngày & ca không?
-        $lichBacSi = LichLamViec::where('id_nhanvien', $validated['id_nhanvien'])->get();
+    // Kiểm tra lịch làm việc
+    $lichBacSi = LichLamViec::where('id_nhanvien', $validated['id_nhanvien'])->get();
+    $hopLe = false;
 
-        $hopLe = false;
-
-        foreach ($lichBacSi as $lich) {
-            $json = json_decode($lich->thoigianlamviec, true);
-            foreach ($json as $ngayCa) {
-                if ($ngayCa['ngay'] === $validated['ngayhen'] && in_array($validated['id_cakham'], $ngayCa['ca'])) {
-                    $hopLe = true;
-                    break 2;
-                }
+    foreach ($lichBacSi as $lich) {
+        $json = json_decode($lich->thoigianlamviec, true);
+        foreach ($json as $ngayCa) {
+            if ($ngayCa['ngay'] === $validated['ngayhen'] && in_array($validated['id_cakham'], $ngayCa['ca'])) {
+                $hopLe = true;
+                break 2;
             }
         }
+    }
 
-        if (!$hopLe) {
-            return response()->json(['error' => 'Bác sĩ không có lịch làm việc phù hợp.'], 422);
-        }
+    if (!$hopLe) {
+        return response()->json(['error' => 'Bác sĩ không có lịch làm việc phù hợp.'], 422);
+    }
 
-                return LichHen::create($validated);
-            }
+    // ✅ Lưu lịch
+    $lichHen = LichHen::create($validated);
+
+    // ✅ Load quan hệ để dùng trong mail
+    $lichHen->load('khachhang.taikhoan');
+
+    // ✅ Gửi mail
+    Mail::to($user->email)->send(new LichHenMail($lichHen));
+
+    return response()->json([
+        'message' => 'Đặt lịch thành công, email xác nhận đã gửi',
+        'data' => $lichHen
+    ]);
+}
 
 
     
