@@ -7,6 +7,7 @@ use App\Models\TaiKhoan;
 use App\Models\KhachHang;
 use App\Models\NhanVien;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Carbon;
 class AuthController extends Controller
 {
     public function register(Request $request)
@@ -30,7 +31,9 @@ class AuthController extends Controller
     $nguoidung = \App\Models\KhachHang::create([
         'nghenghiep' => $request->nghenghiep ?? '',
     ]);
-
+    // if(Carbon::parse($request->ngaysinh)->diffInYears(now())<10){
+    //      return response()->json(['message' => 'Khách hàng nhỏ hơn 10 tuổi không nhận'], 409);
+    // }
     $taikhoan = \App\Models\TaiKhoan::create([
         'hoten' => $validated['hoten'],
         'matkhau' => bcrypt($validated['matkhau']),

@@ -92,7 +92,7 @@ class HoaDonController extends Controller
     public function destroy(Request $request, $id)
     {
         $user = Auth::user();
-        if (!$user->nhanvien || !in_array($user->nhanvien->chucvu, ['letan', 'thungan'])) {
+        if(!$user->nhanvien || !in_array($user->nhanvien->chucvu,['thungan'])){
             return response()->json(['message' => 'Bạn không có quyền huỷ hoá đơn!'], 403);
         }
 
@@ -106,7 +106,7 @@ class HoaDonController extends Controller
             return response()->json(['message' => 'Không thể huỷ hoá đơn đã thanh toán.'], 400);
         }
 
-        $hoadon->trangthai = 'huy';
+        $hoadon->trangthai = 'da_huy';
         $hoadon->lydo_huy = $request->lydo;
         $hoadon->save();
 
@@ -123,7 +123,7 @@ class HoaDonController extends Controller
 
         ]);
         $hoadon= HoaDon::findOrFail($id);
-        if($hoadon->trangthai==='huy'){
+        if($hoadon->trangthai==='da_huy'){
             return response()->json(['message'=>'Không thể cập nhật hoá đơn đã huỷ!'],400);
         }
         $hoadon->trangthai =$request->trangthai;

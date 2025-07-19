@@ -153,7 +153,7 @@ class ChiDinhController extends Controller
         $chidinh->update([
             'ketqua'       => $validated['ketqua'] ?? $chidinh->ketqua,
             'hinhanh'      => $validated['hinhanh'] ?? $chidinh->hinhanh,
-            'trangthai'    => $validated['trangthai'],
+            'trangthai'    => $validated['trangthai'] ?? 'hoàn thành',
             'ngaythuchien' => $validated['ngaythuchien'] ?? now(),
         ]);
 

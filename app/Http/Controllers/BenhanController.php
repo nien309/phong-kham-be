@@ -132,7 +132,7 @@ class BenhanController extends Controller
     /**
      * 📌 Cập nhật bệnh án (bác sĩ hoặc điều dưỡng)
      */
-  public function update(Request $request, $id)
+  public function update(Request $request, $id) //Benh an
 {
     $user = Auth::user()->load('nhanvien');
 
@@ -142,8 +142,8 @@ class BenhanController extends Controller
 
     $benhan = Benhan::with(['khoa', 'nhanvien'])->findOrFail($id);
 
-    if ($benhan->id_khoa !== $user->nhanvien->id_khoa) {
-        return response()->json(['message' => 'Bạn không được phép chỉnh bệnh án khoa khác'], 403);
+    if ($benhan->id_nhanvien !== $user->nhanvien->id_nhanvien) {
+        return response()->json(['message' => 'Bạn không được phép chỉnh của bác sĩ khác'], 403);
     }
 
     $request->validate([
