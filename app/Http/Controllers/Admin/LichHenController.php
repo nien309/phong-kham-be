@@ -14,6 +14,8 @@ use App\Models\CaKham;
 use App\Models\Khoa;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\LichHenMail;
+use App\Mail\XacNhanLichHen;
+
 
 class LichHenController extends Controller
 {
@@ -152,19 +154,27 @@ class LichHenController extends Controller
     }
 
   
-    public function capNhatTrangThai(Request $request, $id)
-    {
-        $lichhen = LichHen::findOrFail($id);
+   public function capNhatTrangThai(Request $request, $id)
+{
+    $lichhen = LichHen::with('khachhang.taikhoan')->findOrFail($id);
 
-        $validated = $request->validate([
-            'trangthai' => 'required|in:chờ xác nhận,đã xác nhận,chuyển đến bác sĩ,chuyển đến lễ tân,hoàn thành,đã huỷ',
-        ]);
+    $validated = $request->validate([
+        'trangthai' => 'required|in:chờ xác nhận,đã xác nhận,chuyển đến bác sĩ,chuyển đến lễ tân,hoàn thành,đã huỷ',
+    ]);
 
-        $lichhen->update(['trangthai' => $validated['trangthai']]);
+    $lichhen->update(['trangthai' => $validated['trangthai']]);
 
-        return $lichhen;
+    if ($validated['trangthai'] === 'đã xác nhận') {
+        $taikhoan = $lichhen->khachhang->taikhoan;
+
+        if ($taikhoan && $taikhoan->email) {
+            Mail::to($taikhoan->email)->send(new XacNhanLichHen($lichhen));
+        }
     }
-    
+
+    return $lichhen;
+}
+
 
 public function layBacSiTheoLichRanh(Request $request, $id_khoa)
 {
