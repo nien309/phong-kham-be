@@ -72,9 +72,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('thong-tin-kham-benh/{id}/chi-tiet', [ThongTinKhamBenhController::class, 'chiTiet']);
 
     // 🟩 KHÁCH HÀNG ĐẶT LỊCH
-   Route::post('/lichhen', [LichHenController::class, 'datLich']);
-
-
+    
+    Route::post('/lichhen', [LichHenController::class, 'datLich']);
+    Route::put('/lichhen/chuyenBacSi/{id}', [LichHenController::class, 'chuyenSangBacSi']);
+    
     // 🟥 ADMIN DASHBOARD
     Route::middleware('check.admin')->prefix('admin')->group(function () {
         Route::get('/taikhoan', [AdminTaiKhoanController::class, 'index']);

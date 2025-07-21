@@ -82,17 +82,31 @@ class LichHenController extends Controller
     }
 
     $validated = $request->validate([
-        'id_nhanvien' => 'required|exists:nhan_viens,id_nhanvien',
-        'id_khoa' => 'required|exists:khoas,id_khoa',
+        'id_nhanvien' => 'nullable|exists:nhan_viens,id_nhanvien',
+        'id_khoa' => 'nullable|exists:khoas,id_khoa',
         'id_cakham' => 'required|exists:cakham,id_cakham',
         'ngayhen' => 'required|date',
         'ghichu' => 'nullable|string',
     ]);
 
+    
     $validated['id_khachhang'] = $khachhang->id_khachhang;
     $validated['trangthai'] = 'chờ xác nhận';
+    //kiểm tra slot còn trong ca khám
+    $query= LichHen::whereDate('ngayhen',$validated['ngayhen'])->where('id_cakham',$validated['id_cakham']);
+    if(!empty($validated['id_nhanvien'])){
+        $query->where('id_nhanvien', $validated['id_nhanvien']);
+    }
+    if(!empty($validated['id_khoa'])){
+        $query->where('id_khoa', $validated['id_khoa']);
+    }
 
+    $count=$query->count();
+    if($count >=10){
+        return response()->json(['error'=>'Số lượng lịch hẹn cho ca khám đã đủ 10 người'],422);
+    }
     // Kiểm tra lịch làm việc
+    if (!empty($validated['id_nhanvien'])) {
     $lichBacSi = LichLamViec::where('id_nhanvien', $validated['id_nhanvien'])->get();
     $hopLe = false;
 
@@ -106,8 +120,9 @@ class LichHenController extends Controller
         }
     }
 
-    if (!$hopLe) {
-        return response()->json(['error' => 'Bác sĩ không có lịch làm việc phù hợp.'], 422);
+        if (!$hopLe) {
+            return response()->json(['error' => 'Bác sĩ không có lịch làm việc phù hợp.'], 422);
+        }
     }
 
     // ✅ Lưu lịch
@@ -125,20 +140,20 @@ class LichHenController extends Controller
     ]);
 }
 
-
     
     public function taoLich(Request $request)
     {
+            $user = auth()->user();
             $validated = $request->validate([
         'id_khachhang' => 'required|exists:khach_hangs,id_khachhang',
-        'id_nhanvien' => 'required|exists:nhan_viens,id_nhanvien',
-        'id_khoa' => 'required|exists:khoas,id_khoa',
+        
         'id_cakham' => 'required|exists:cakham,id_cakham',
         'ngayhen' => 'required|date',
         'ghichu' => 'nullable|string',
     ]);
 
-
+    $validated['id_nhanvien'] = $user->nhanvien->id_nhanvien;
+    $validated['id_khoa'] = $user->nhanvien->id_khoa;
         $validated['trangthai'] = 'đã xác nhận';
 
         return LichHen::create($validated);
@@ -174,16 +189,25 @@ class LichHenController extends Controller
 
     return $lichhen;
 }
-
+public function chuyenSangBacSi(Request $request,$id){
+    $lichhen = LichHen::with('khachhang.taikhoan')->findOrFail($id);
+    $validated = $request->validate([
+        'id_nhanvien' => 'required|exists:nhan_viens,id_nhanvien',
+        'id_khoa'=> 'required|exists:khoas,id_khoa'
+    ]);
+    $lichhen->update($validated);
+    return $lichhen;
+}
 
 public function layBacSiTheoLichRanh(Request $request, $id_khoa)
 {
     $ngayhen = $request->input('ngayhen');
+    
     $id_cakham = $request->input('id_cakham');
 
     // Validate input
-    if (!$ngayhen || !$id_cakham) {
-        return response()->json(['error' => 'Thiếu ngày hẹn hoặc ca khám'], 400);
+    if (!$ngayhen || !$id_cakham ) {
+        return response()->json(['error' => 'Thiếu ngày hẹn và ca khám '], 400);
     }
 
     // Lấy tất cả bác sĩ thuộc khoa + nạp sẵn tài khoản
