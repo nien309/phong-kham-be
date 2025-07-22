@@ -75,7 +75,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/lichhen', [LichHenController::class, 'datLich']);
     Route::put('/lichhen/chuyenBacSi/{id}', [LichHenController::class, 'chuyenSangBacSi']);
-    
+    Route::get('/lichhen/bacsi/{id}', [LichHenController::class, 'getLichHenByBacSi']);
+
     // 🟥 ADMIN DASHBOARD
     Route::middleware('check.admin')->prefix('admin')->group(function () {
         Route::get('/taikhoan', [AdminTaiKhoanController::class, 'index']);

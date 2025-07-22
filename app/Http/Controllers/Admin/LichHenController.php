@@ -140,6 +140,21 @@ class LichHenController extends Controller
     ]);
 }
 
+public function getLichHenByBacSi($id_nhanvien){
+    $nhanvien=NhanVien::where('id_nhanvien', $id_nhanvien)
+                        ->where('chucvu','bacsi')
+                        ->first();
+    if(!$nhanvien){
+        return response()->json(['message'=>'Nhân viên không phải bác sĩ hoặc không tồn tại'],400);
+    }
+    $lichhen=LichHen::with(['khachhang.taikhoan','cakham'])
+                        ->where('id_nhanvien',$id_nhanvien)
+                        ->get();
+    if($lichhen->isEmpty()){
+        return response()->json(['message'=>'Không tìm thấy lịch hẹn'],404);
+    }
+    return response()->json($lichhen);
+}
     
     public function taoLich(Request $request)
     {
