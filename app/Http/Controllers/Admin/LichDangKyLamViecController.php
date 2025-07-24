@@ -153,7 +153,7 @@ class LichDangKyLamViecController extends Controller
         'trangthai' => $validated['trangthai'] ?? $lich->trangthai,
         'ghichu' => $validated['ghichu'] ?? $lich->ghichu,
     ]);
-
+        LogService::log('Duyệt lịch đăng ký ID: ' . $lich->id_dangky, 'lich_dang_ky_lam_viec');
     return response()->json([
         'message' => 'Cập nhật thành công.',
         'data' => $lich

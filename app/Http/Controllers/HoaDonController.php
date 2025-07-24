@@ -48,6 +48,7 @@ class HoaDonController extends Controller
             'trangthai' => 'cho_thanh_toan',
         ]);
 
+            LogService::log('Tạo hoá đơn ID: ' . $hoadon->id_hoadon, 'hoadon');
         return response()->json([
             'message' => 'Tạo hoá đơn thành công.',
             'hoadon' => $hoadon
@@ -104,6 +105,7 @@ class HoaDonController extends Controller
         $hoadon->trangthai='huy';
         $hoadon->lydo_huy=$request->lydo;
         $hoadon->save();
+            LogService::log('Huỷ hoá đơn ID: ' . $hoadon->id_hoadon, 'hoadon');
         return response()->json(['message'=>'Đã huỷ hoá đơn thành công']);
     }
     public function update(Request $request, $id){
@@ -121,6 +123,7 @@ class HoaDonController extends Controller
         }
         $hoadon->trangthai =$request->trangthai;
         $hoadon->save();
+            LogService::log('Cập nhật trạng thái hoá đơn ID: ' . $hoadon->id_hoadon, 'hoadon');
         return response()->json([
             'message' => "Cập nhật trạng thái hoá đơn thành công.",
             'hoadon' =>$hoadon,
