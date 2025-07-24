@@ -37,9 +37,9 @@ class HosoBenhAnController extends Controller
 
     $hoso = HosoBenhAn::with('benhans', 'khachhang')
                 ->where('id_khachhang', $khachhang->id_khachhang)
-                ->get();
+                ->first();
 
-    if ($hoso->isEmpty()) {
+    if (!$hoso) {
         return response()->json(['message' => 'Bạn chưa có hồ sơ bệnh án'], 404);
     }
 
