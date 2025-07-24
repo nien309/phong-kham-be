@@ -35,7 +35,7 @@ class HosoBenhAnController extends Controller
         return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
     }
 
-    $hoso = HosoBenhAn::with('benhans', 'khachhang')
+    $hoso = HosoBenhAn::with('benhans.khoa', 'khachhang', 'benhans.nhanvien.taikhoan')
                 ->where('id_khachhang', $khachhang->id_khachhang)
                 ->first();
 
