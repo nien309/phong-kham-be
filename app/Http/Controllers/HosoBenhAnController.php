@@ -136,7 +136,7 @@ public function searchByPhone(Request $request)
     $user = Auth::user()->load('nhanvien');
 
     $chucvu = $user->nhanvien->chucvu ?? null;
-    if (!in_array($chucvu, ['bacsi', 'letan'])) {
+    if (!in_array($chucvu, ['bacsi', 'letan','dieuduong'])) {
         return response()->json(['message' => 'Không có quyền tìm kiếm hồ sơ'], 403);
     }
 

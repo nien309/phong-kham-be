@@ -11,6 +11,7 @@ use App\Http\Controllers\ChiDinhController;
 use App\Http\Controllers\ToaThuocController;
 use App\Http\Controllers\ChiTietToaThuocController;
 use App\Http\Controllers\DichVuController;
+use App\Http\Controllers\LogService;
 
 
 use App\Http\Controllers\HoaDonController;
@@ -54,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('benhan', BenhanController::class)->except(['destroy']);
     Route::apiResource('thongtinkhambenh', ThongTinKhamBenhController::class);
     Route::apiResource('chidinh', ChiDinhController::class)->only(['index', 'store', 'show', 'update']);
-
+    Route::get('/log', [LogService::class, 'index']);
     Route::get('/lich-hen-cua-toi', [LichHenController::class, 'lichHenCuaToi']);
     Route::apiResource('toathuoc', ToaThuocController::class)->only(['index', 'store', 'show', 'update']);
     Route::apiResource('chitiettoathuoc', ChiTietToaThuocController::class);
