@@ -22,6 +22,8 @@ class LogService extends Controller
     $toDate = $request->query('to_date');     // định dạng YYYY-MM-DD
 
     $query = Log::query();
+    
+    $query = Log::with('taikhoan');
 
    
 
