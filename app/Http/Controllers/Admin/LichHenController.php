@@ -95,7 +95,7 @@ class LichHenController extends Controller
     //kiểm tra slot còn trong ca khám
     $query= LichHen::whereDate('ngayhen',$validated['ngayhen'])->where('id_cakham',$validated['id_cakham']);
     $count=$query->count();
-    if($count >=10){
+    if($count >=100){
         return response()->json(['error'=>'Số lượng lịch hẹn cho ca khám đã đủ 100 người'],422);
     }
     if(!empty($validated['id_nhanvien'])){
@@ -104,7 +104,7 @@ class LichHenController extends Controller
     if(!empty($validated['id_khoa'])){
         $query->where('id_khoa', $validated['id_khoa']);
     }
-    if($query->count()>=5 && !empty($validated['id_nhanvien']) && !empty($validated['id_khoa'])){
+    if($query->count()>=10 && !empty($validated['id_nhanvien']) && !empty($validated['id_khoa'])){
           return response()->json(['error'=>'Số lượng lịch hẹn cho ca khám đã đủ 10 người cho bác sĩ này'],422);
     }
     // Kiểm tra lịch làm việc
