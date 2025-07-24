@@ -126,7 +126,7 @@ class ThongTinKhamBenhController extends Controller
     {
         return response()->json(['message' => 'Không hỗ trợ xoá thông tin khám bệnh'], 405);
     }
-    public function thongTinKhamBenhCuaToi()
+    public function thongTinKhamBenhCuaToi($id_benhan)
 {
     $user = Auth::user();
 
@@ -139,9 +139,9 @@ class ThongTinKhamBenhController extends Controller
         return response()->json(['message' => 'Không tìm thấy thông tin khách hàng'], 404);
     }
 
-    $ttkb = ThongTinKhamBenh::whereHas('benhan.hosobenhan', function ($q) use ($khachhang) {
-        $q->where('id_khachhang', $khachhang->id_khachhang);
-    })->with(['benhan'])->get();
+    $ttkb = ThongTinKhamBenh::where('id_benhan', $id_benhan)
+        ->with([ 'chidinh', 'toathuoc', 'hoadon'])
+        ->get();
 
     return response()->json($ttkb);
 }
