@@ -220,6 +220,10 @@ public function chuyenSangBacSi(Request $request,$id){
         'id_nhanvien' => 'required|exists:nhan_viens,id_nhanvien',
         'id_khoa'=> 'required|exists:khoas,id_khoa'
     ]);
+    // $nhanvien=NhanVien::findOrFail($validated['id_nhanvien']);
+    // if($nhanvien->chucvu !== 'bacsi'){
+    //     return response()->json(['error' => 'Nhân viên này không phải bác sĩ'],422);
+    // }
     $lichhen->update($validated);
     return $lichhen;
 }

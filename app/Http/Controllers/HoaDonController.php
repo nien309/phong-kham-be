@@ -7,6 +7,8 @@ use App\Models\ThongTinKhamBenh;
 use App\Models\ChiDinh;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\LogService;
+
 use PDF;
 
 class HoaDonController extends Controller

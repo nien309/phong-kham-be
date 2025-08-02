@@ -106,6 +106,9 @@ class ThongTinKhamBenhController extends Controller
         if ($ttkb->benhan->id_khoa !== $user->nhanvien->id_khoa) {
             return response()->json(['message' => 'Không được chỉnh TT khám bệnh khoa khác'], 403);
         }
+        if($ttkb->trangthai === 'da_hoan_thanh'){
+            return response()->json(['message'=> 'Thông tin khám bệnh đã hoàn thành, không thể chỉnh sửa'],422);
+        }
 
         $request->validate([
            
