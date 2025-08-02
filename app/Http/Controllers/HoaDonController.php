@@ -17,45 +17,46 @@ class HoaDonController extends Controller
      * TẠO HOÁ ĐƠN (Chỉ lễ tân/thu ngân)
      */
     public function store(Request $request)
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user()->load('nhanvien');
 
-        // 👉 RÀNG BUỘC: Chỉ nhân viên có chức vụ lễ tân/thu ngân
-        if (!$user->nhanvien || !in_array($user->nhanvien->chucvu, ['letan', 'thungan'])) {
-            return response()->json(['message' => 'Bạn không có quyền tạo hoá đơn!'], 403);
-        }
-
-        $request->validate([
-            'id_thongtinkhambenh' => 'required|exists:thongtinkhambenh,id_thongtinkhambenh',
-            'hinhthucthanhtoan' => 'in:tien_mat,chuyen_khoan,vi_dien_tu',
-        ]);
-
-        // Lấy chỉ định
-        $chidinh = ChiDinh::where('id_thongtinkhambenh', $request->id_thongtinkhambenh)->get();
-
-        if ($chidinh->isEmpty()) {
-            return response()->json(['message' => 'Không có chỉ định nào để tính tiền!'], 400);
-        }
-
-        // Tính tổng tiền
-        $tongtien = $chidinh->sum(fn($item) => $item->soluong * $item->dongia);
-
-        // Tạo hoá đơn
-        $hoadon = HoaDon::create([
-            'id_thongtinkhambenh' => $request->id_thongtinkhambenh,
-            'id_taikhoan' => $user->id_taikhoan,
-            'tongtien' => $tongtien,
-            'ngaytao' => now(),
-            'hinhthucthanhtoan' => $request->hinhthucthanhtoan ?? 'tien_mat',
-            'trangthai' => 'cho_thanh_toan',
-        ]);
-
-            LogService::log('Tạo hoá đơn ID: ' . $hoadon->id_hoadon, 'hoadon');
-        return response()->json([
-            'message' => 'Tạo hoá đơn thành công.',
-            'hoadon' => $hoadon
-        ], 201);
+    if (!$user->nhanvien || !in_array($user->nhanvien->chucvu, ['letan', 'thungan'])) {
+        return response()->json(['message' => 'Bạn không có quyền tạo hoá đơn!'], 403);
     }
+
+    $request->validate([
+        'id_thongtinkhambenh' => 'required|exists:thongtinkhambenh,id_thongtinkhambenh',
+        'hinhthucthanhtoan' => 'in:tien_mat,chuyen_khoan,vi_dien_tu',
+    ]);
+
+    if (HoaDon::where('id_thongtinkhambenh', $request->id_thongtinkhambenh)->exists()) {
+        return response()->json(['message' => 'Hoá đơn đã tồn tại!'], 409);
+    }
+
+    $chidinh = ChiDinh::where('id_thongtinkhambenh', $request->id_thongtinkhambenh)->get();
+    if ($chidinh->isEmpty()) {
+        return response()->json(['message' => 'Không có chỉ định nào để tính tiền!'], 400);
+    }
+
+    $tongtien = $chidinh->sum(fn($item) => (float) $item->soluong * (float) $item->dongia);
+
+    $hoadon = HoaDon::create([
+        'id_thongtinkhambenh' => $request->id_thongtinkhambenh,
+        'id_taikhoan' => $user->id_taikhoan,
+        'tongtien' => $tongtien,
+        'ngaytao' => now(),
+        'hinhthucthanhtoan' => $request->hinhthucthanhtoan ?? 'tien_mat',
+        'trangthai' => 'cho_thanh_toan',
+    ]);
+
+    LogService::log('Tạo hoá đơn ID: ' . $hoadon->id_hoadon, 'hoadon');
+
+    return response()->json([
+        'message' => 'Tạo hoá đơn thành công.',
+        'hoadon' => $hoadon
+    ], 201);
+}
+
 
     
      
