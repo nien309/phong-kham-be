@@ -112,7 +112,7 @@ class NhanVienController extends Controller
         public function getByKhoa($id_khoa)
 {
     $bacsi = \App\Models\NhanVien::where('id_khoa', $id_khoa)
-        // ->where('chucvu', 'bacsi')
+        ->where('chucvu', 'bacsi')
         ->with([
             'taikhoan:id_taikhoan,id_nguoidung,hoten',
             'khoa:id_khoa,tenkhoa'
