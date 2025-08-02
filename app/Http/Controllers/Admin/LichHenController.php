@@ -98,7 +98,7 @@ class LichHenController extends Controller
     $daDat= LichHen::whereDate('ngayhen',$validated['ngayhen'])->where('id_cakham',$validated['id_cakham']);
     if(!empty($validated['id_khachhang'])){
        
-        if(!$daDat->where('id_khachhang', $validated['id_khachhang'])->first()){
+        if($daDat->where('id_khachhang', $validated['id_khachhang'])->first()){
         return response()->json(['error'=>'Bạn đã đặt lịch cho ngày hẹn và ca khám này'],422);
         }
     }
