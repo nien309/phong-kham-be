@@ -92,7 +92,7 @@ class HosoBenhAnController extends Controller
             'id_khachhang' => $khachhang->id_khachhang,
         ]);
 
-        LogService::log('Tạo hồ sơ bệnh án ID: ' . $id_hosobenhan, 'hosobenhan');
+        LogService::log('Tạo hồ sơ bệnh án ID: ' . $hosobenhan->id_hosobenhan, 'hosobenhan');
         return response()->json([
             'message' => 'Tạo hồ sơ bệnh án thành công',
             'data' => $hosobenhan
